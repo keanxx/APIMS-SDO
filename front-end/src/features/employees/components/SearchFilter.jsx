@@ -9,7 +9,7 @@ const SearchFilter = () => {
     <div>
         <Card>
             <CardContent>
-                <div className='flex gap-5'>
+                <div className='grid grid-cols-2 md:flex gap-5'>
                 <div className='flex-1'>
                     <div className='relative'>
                     <Search className='absolute left-3 top-3 h-4 w-4'/>

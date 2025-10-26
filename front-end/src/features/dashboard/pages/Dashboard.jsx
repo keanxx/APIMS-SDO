@@ -9,7 +9,7 @@ const Dashboard = () => {
   return (
     <div className='space-y-4 bg-[#F7F9F7]'>
     
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
+    <div className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6'>
       <Card className="shadow-lg border-0">
         <CardContent>
           <div className='flex justify-between items-center'>

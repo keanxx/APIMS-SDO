@@ -9,6 +9,8 @@ import Benefits from "../features/benefits/pages/Benefits";
 import Position from "../features/position/pages/Position";
 import Retirements from "../features/retirement/pages/Retirements";
 import SchoolCalendar from "../features/school_calendar/pages/SchoolCalendar";
+import EmployeeOverview from "@/features/employees/pages/EmployeeOverview";
+import EmployeeEdit from "@/features/employees/pages/EmployeeEdit";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,7 +23,11 @@ export default function App() {
       <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
        <Route element={<SidebarLayout />}>
          <Route path="dashboard" element={<Dashboard />} />
-         <Route path="employees" element={<Employees />} />
+         <Route path="employees">
+          <Route index element={<Employees />} />
+          <Route path=":id" element={<EmployeeOverview />} /> 
+          <Route path=":id/edit" element={<EmployeeEdit />} /> 
+        </Route>
          <Route path="benefits" element={<Benefits />} />
          <Route path="position" element={<Position />} />
          <Route path="retirement" element={<Retirements />} />

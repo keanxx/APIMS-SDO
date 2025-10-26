@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select"
 import { useNavigate, useParams } from "react-router-dom"
 import FamilyTab from "../components/FamilyTab"
+import EducationTab from "../components/EducationTab"
 
 const EmployeeEdit = () => {
   const { id } = useParams()
@@ -77,11 +78,11 @@ const EmployeeEdit = () => {
         <CardContent>
           <Tabs defaultValue="personal">
             <TabsList className="mb-4 flex w-full overflow-x-auto ">
-              <TabsTrigger value="personal" className="flex-shrink-0">Personal Information</TabsTrigger>
-              <TabsTrigger value="family" className="flex-shrink-0">Family Background</TabsTrigger>
-              <TabsTrigger value="education" className="flex-shrink-0">Educational Background</TabsTrigger>
-              <TabsTrigger value="work" className="flex-shrink-0">Work Experience</TabsTrigger>
-              <TabsTrigger value="other" className="flex-shrink-0">Other Information</TabsTrigger>
+              <TabsTrigger value="personal" className="flex-shrink-0">Personal</TabsTrigger>
+              <TabsTrigger value="family" className="flex-shrink-0">Family</TabsTrigger>
+              <TabsTrigger value="education" className="flex-shrink-0">Education</TabsTrigger>
+              <TabsTrigger value="work" className="flex-shrink-0">Eligibility</TabsTrigger>
+              <TabsTrigger value="other" className="flex-shrink-0">Tranings</TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
@@ -127,9 +128,13 @@ const EmployeeEdit = () => {
   </Card>
 </TabsContent>
 
- {/* Family Information Tab */}
+         {/* Family Information Tab */}
          <TabsContent value="family">
            <FamilyTab />
+         </TabsContent>
+         {/* Education Information Tab */}
+         <TabsContent value="education">
+           <EducationTab />
          </TabsContent>
 
 

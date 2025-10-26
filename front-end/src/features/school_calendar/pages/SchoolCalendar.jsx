@@ -3,9 +3,9 @@ import React from 'react'
 
 const SchoolCalendar = () => {
   return (
-    <SidebarLayout>
+    
       <div className=''>school calendar</div>
-    </SidebarLayout>
+  
   )
 }
 

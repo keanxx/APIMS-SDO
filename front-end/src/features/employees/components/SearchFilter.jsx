@@ -34,11 +34,11 @@ const SearchFilter = () => {
                 </Select>
                 <Select>
                     <SelectTrigger>
-                        <SelectValue placeholder="Department"/>
+                        <SelectValue placeholder="District"/>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>Departments</SelectLabel>
+                            <SelectLabel>District</SelectLabel>
                             <SelectItem value="ICT">ICT</SelectItem>
                             <SelectItem value="GOD">GOD</SelectItem>
                             <SelectItem value="SDS">SDS</SelectItem>
@@ -50,11 +50,11 @@ const SearchFilter = () => {
                 </Select>
                 <Select>
                     <SelectTrigger>
-                        <SelectValue placeholder="Department"/>
+                        <SelectValue placeholder="Position"/>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectLabel>Departments</SelectLabel>
+                            <SelectLabel>Position</SelectLabel>
                             <SelectItem value="ICT">ICT</SelectItem>
                             <SelectItem value="GOD">GOD</SelectItem>
                             <SelectItem value="SDS">SDS</SelectItem>

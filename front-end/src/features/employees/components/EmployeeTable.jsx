@@ -69,8 +69,8 @@ const totalPages = Math.ceil(tabledata.length / itemsPerPage)
             <TableRow>
               <TableHead>Employee</TableHead>
               <TableHead>Position</TableHead>
-              <TableHead className="hidden sm:block">School/Office</TableHead>
-              <TableHead className="hidden sm:block">District</TableHead>
+              <TableHead >School/Office</TableHead>
+              <TableHead >District</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -98,10 +98,11 @@ const totalPages = Math.ceil(tabledata.length / itemsPerPage)
                   </div>
                 </TableCell>
                 <TableCell>{employee.position}</TableCell>
-                <TableCell className="hidden sm:block">{employee.school}</TableCell>
-                <TableCell className="hidden sm:block">{employee.district}</TableCell>
+                <TableCell >{employee.school}</TableCell>
+                <TableCell >{employee.district}</TableCell>
                 <TableCell>
-                  <Button size="sm" onClick={() => navigate(`/employees/${employee.id}`)}>View</Button>
+                  <Button className = "bg-[#F7F9F7 border border-[#7CB342] text-[#2D5A2D]"size="sm" variant="outline"
+                  onClick={() => navigate(`/employees/${employee.id}`)}>View</Button>
                 </TableCell>
               </TableRow>
             ))}

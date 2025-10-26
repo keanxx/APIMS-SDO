@@ -3,9 +3,9 @@ import React from 'react'
 
 const Position = () => {
   return (
-    <SidebarLayout>
+    
       <div className=''>position</div>
-    </SidebarLayout>
+   
   )
 }
 

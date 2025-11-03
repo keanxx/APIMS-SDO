@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import React from 'react'
@@ -25,14 +26,7 @@ const FamilyTab = () => {
         { key: "spouse_employer", label: "Telephone Number", placeholder: "043850346" },
       ],
     },
-    {
-      title: "Children Information",
-      type: "repeatable", // 👈 special flag
-      fields: [
-        { key: "child_name", label: "Child Name", placeholder: "Enter child name" },
-        { key: "child_birth_date", label: "Birth Date", placeholder: "MM/DD/YYYY", type: "date" },
-      ],
-    },
+   
     {
       title: "Parent Information",
       fields: [
@@ -44,8 +38,7 @@ const FamilyTab = () => {
 
   return (
     <div>
-      <Card>
-        <CardContent>
+     
           <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
             {familySections.map((section, sectionIndex) => (
               <Card key={sectionIndex}>
@@ -67,16 +60,47 @@ const FamilyTab = () => {
                     </div>
                   </div>
                 </CardContent>
-                {section.title === "Children Information" && (
-                  <CardFooter>
-                    <Button>Add Child</Button>
-                  </CardFooter>
-                )}
+               
+                  
               </Card>
+
+             
             ))}
+
+            <Card>
+              <CardContent>
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold text-[#1A3A1A] border-b pb-1">
+                    Children Information
+                  </h2>
+                  <div className="flex flex-col md:flex-row justify-between">
+                    <p className="text-gray-500">Choco Martin</p>
+                    <p className="text-gray-600 text-xs md:text-base">03/30/2005</p>
+                  </div>
+                  
+                  <div className="">
+                    <p className='text-gray-500'>No children added yet.</p>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                    <Dialog>
+                      <DialogTrigger>
+                        <Button variant="outline">Add Child</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        
+                        <div className="space-y-4">
+                          <Label>Name</Label>
+                          <Input placeholder="Enter child name" />
+                          <Label>Birth Date</Label>
+                          <Input placeholder="MM/DD/YYYY" type="date" />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </CardFooter>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

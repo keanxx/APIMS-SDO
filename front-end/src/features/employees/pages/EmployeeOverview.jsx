@@ -2,21 +2,37 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, MapPin, Phone } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 const EmployeeOverview = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [employee, setEmployee] = useState()
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const employee = {
-    id,
-    name: "Choco Martin",
-    email: "chocomartin@deped.edu.ph",
-    position: "Administrative Aide III",
-    school: "SDS",
-    district: "District 1",
-    phone: "123-456-7890",
-  }
+  const API_URL = import.meta.env.VITE_API_URL;
+  
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const res = await fetch(`${API_URL}/employee/${id}`);
+        const data = await res.json();
+        setEmployee(data.data)
+      } catch (err) {
+        setError("Failed to fetch employee data.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEmployee()
+  }, [id, API_URL])
+
+    if (loading) return <div className="p-6">Loading...</div>
+  if (error) return <div className="p-6 text-red-600">{error}</div>
+  if (!employee) return <div className="p-6">No employee data found.</div>
 
   return (
     <div className="space-y-6 bg-[#F7F9F7] p-6">
@@ -32,29 +48,26 @@ const EmployeeOverview = () => {
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20">
               <AvatarFallback className="text-xl">
-                {employee.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
+                {employee.f_name && employee.l_name
+                  ? `${employee.f_name[0]}${employee.l_name[0]}`.toUpperCase()
+                  : "N/A"}
               </AvatarFallback>
             </Avatar>
 
             <div>
               <h2 className="text-2xl font-semibold text-[#1A3A1A]">
-                {employee.name}
+               {employee.f_name} {employee.m_name} {employee.l_name}
               </h2>
               <p className="text-muted-foreground text-base">
-                {employee.position}
+               {employee.position_name || "No position"}
               </p>
-              <p className="text-sm text-gray-500">{employee.school}</p>
+              <p className="text-sm text-gray-500">{employee.workstation_name || "—"}</p>
             </div>
           </div>
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => navigate(`/employees/${id}/edit`)}>
+           <Button onClick={() => navigate(`/employees/${id}/edit`)}>
               CSC Form 212
             </Button>
             <Button variant="outline">Leave Credits</Button>
@@ -110,16 +123,18 @@ const EmployeeOverview = () => {
             <div className="flex flex-col gap-2 md:gap-4">
                <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-muted-foreground" />
-              <span>{employee.email}</span>
+              <span>{employee.email_address || "No email"}</span>
             </div>
             <div className="flex items-center gap-3">
               <Phone className="h-5 w-5 text-muted-foreground" />
-              <span>{employee.phone}</span>
+              <span>{employee.mobile_no || "No phone number"}</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="h-5 w-5 text-muted-foreground" />
               <span>
-                {employee.school}, {employee.district}
+                {employee.province
+                  ? `${employee.province}, ${employee.municipality}`
+                  : "No address on record"}
               </span>
             </div>
             </div>

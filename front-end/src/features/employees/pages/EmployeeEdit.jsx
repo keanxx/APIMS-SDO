@@ -35,14 +35,15 @@ const EmployeeEdit = () => {
 
             {/* Personal Information Tab */}
          <TabsContent value="personal">
-          <PersonalTab/>
+          <PersonalTab employeeId = {id}/>
 
         </TabsContent>
 
          {/* Family Information Tab */}
          <TabsContent value="family">
-           <FamilyTab />
-         </TabsContent>
+  <FamilyTab employeeId={id} />
+</TabsContent>
+
          {/* Education Information Tab */}
          <TabsContent value="education">
            <EducationTab />
@@ -53,17 +54,7 @@ const EmployeeEdit = () => {
         </CardContent>
 
      
-        <CardFooter>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/employees/${id}`)}
-            >
-              Cancel
-            </Button>
-            <Button>Save</Button>
-          </div>
-        </CardFooter>
+        
       </Card>
     </div>
   )

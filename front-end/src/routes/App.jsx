@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Login from "../features/auth/pages/Login";
-import ProtectedRoutes from "./ProtectedRoutes";
 import SidebarLayout from "../components/SidebarLayout";
 import Dashboard from "../features/dashboard/pages/Dashboard";
 import Employees from "../features/employees/pages/Employees";
@@ -24,30 +23,26 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
 
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
-       <Route element={<SidebarLayout />}>
-         <Route path="dashboard" element={<Dashboard />} />
-         <Route path="employees">
+      <Route element={<SidebarLayout />}>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="employees">
           <Route index element={<Employees />} />
           <Route path=":id" element={<EmployeeOverview />} /> 
           <Route path=":id/edit" element={<EmployeeEdit />} /> 
-        </ Route>
-         <Route path="service-record" element={<ServiceRecord />} />
-          <Route path="position-management">
-            <Route index element={<PositionManagement />} />
-            <Route path="position" element={<Position />} />
-            <Route path="items" element={<Items />} />
-            <Route path="salary" element={<Salary />} />
-          </Route>
-         <Route path="retirement" element={<Retirements />} />
-         <Route path="school-calendar" element={<SchoolCalendar />} />
-         
         </Route>
+        <Route path="service-record" element={<ServiceRecord />} />
+        <Route path="position-management">
+          <Route index element={<PositionManagement />} />
+          <Route path="position" element={<Position />} />
+          <Route path="items" element={<Items />} />
+          <Route path="salary" element={<Salary />} />
+        </Route>
+        <Route path="retirement" element={<Retirements />} />
+        <Route path="school-calendar" element={<SchoolCalendar />} />
       </Route>
+      
       <Route path="user" element={<UserDashboard />} />
     </Routes>
-    
    
     </>
   );

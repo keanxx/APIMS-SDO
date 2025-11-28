@@ -17,6 +17,8 @@ import UserDashboard from "@/features/user/pages/UserDashboard";
 import AppointmentDetails from "@/features/appointment/pages/AppointmentDetails";
 import Contract from "@/features/employees/pages/service-record/Contract";
 import EmpServiceRecord from "@/features/employees/pages/service-record/EmpServiceRecord";
+import Contracts from "@/features/appointment/pages/Contracts";
+import Appointments from "@/features/appointment/pages/Appoinments";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,7 +46,11 @@ export default function App() {
         </Route>
         <Route path="retirement" element={<Retirements />} />
         <Route path="school-calendar" element={<SchoolCalendar />} />
-        <Route path="appointment-details" element={<AppointmentDetails />} />
+        <Route path="appointment-details">
+          <Route index element={<AppointmentDetails />} />
+          <Route path="appointment" element={<Appointments />} />
+          <Route path="contract" element={<Contracts />} />
+        </Route>
       </Route>
       
       <Route path="user" element={<UserDashboard />} />

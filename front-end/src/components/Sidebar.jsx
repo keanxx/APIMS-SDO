@@ -7,19 +7,23 @@ const sidebarItems = [
   { path: "/dashboard", label: "Dashboard", icon: Home },
   { path: "/employees", label: "Employees", icon: Users },
   { path: "/retirement", label: "Retirement", icon: Palmtree },
-  {
-    path: "/position-management",
-    label: "Position Management",
-    icon: Briefcase,
+
+  {  path: "/position-management", label: "Position Management",  icon: Briefcase,
     children: [
       { path: "/position-management/position", label: "Position" },
       { path: "/position-management/items", label: "Items" },
       { path: "/position-management/salary", label: "Salary Tranches" },
     ],
   },
+
   { path: "/service-record", label: "Service Record", icon: Heart },
   { path: "/school-calendar", label: "School/Calendar Year", icon: Calendar },
-  { path: "/appointment-details", label: "Appointment Details", icon: Briefcase },
+  { path: "/appointment-details", label: "Appointments & Contracts", icon: Briefcase,
+    children:[
+      {path: "/appointment-details/appointment", label: "Appointments"},
+      {path: "/appointment-details/contract", label: "Contracts"}
+    ]
+   },
 ];
 
 const Sidebar = ({ isOpen, setIsOpen }) => {

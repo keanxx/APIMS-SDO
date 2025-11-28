@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import FamilyTab from "../components/FamilyTab"
 import EducationTab from "../components/EducationTab"
 import PersonalTab from "../components/PersonalTab"
+import EligibilityTab from "../components/EligibilityTab"
 
 const EmployeeEdit = () => {
   const { id } = useParams()
@@ -29,7 +30,7 @@ const EmployeeEdit = () => {
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="family">Family</TabsTrigger>
               <TabsTrigger value="education">Education</TabsTrigger>
-              <TabsTrigger value="work">Eligibility</TabsTrigger>
+              <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
               <TabsTrigger value="other">Tranings</TabsTrigger>
             </TabsList>
 
@@ -50,7 +51,11 @@ const EmployeeEdit = () => {
          </TabsContent>
 
 
+        <TabsContent value="eligibility">
+            <EligibilityTab employeeId={id} />
+          </TabsContent>
           </Tabs>
+          
         </CardContent>
 
      

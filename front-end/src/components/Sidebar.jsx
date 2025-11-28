@@ -19,6 +19,7 @@ const sidebarItems = [
   },
   { path: "/service-record", label: "Service Record", icon: Heart },
   { path: "/school-calendar", label: "School/Calendar Year", icon: Calendar },
+  { path: "/appointment-details", label: "Appointment Details", icon: Briefcase },
 ];
 
 const Sidebar = ({ isOpen, setIsOpen }) => {

@@ -14,6 +14,9 @@ import Items from "@/features/position/pages/Items";
 import Salary from "@/features/position/pages/Salary";
 import ServiceRecord from "@/features/service_record/pages/ServiceRecord";
 import UserDashboard from "@/features/user/pages/UserDashboard";
+import AppointmentDetails from "@/features/appointment/pages/AppointmentDetails";
+import Contract from "@/features/employees/pages/service-record/Contract";
+import EmpServiceRecord from "@/features/employees/pages/service-record/EmpServiceRecord";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -29,6 +32,8 @@ export default function App() {
           <Route index element={<Employees />} />
           <Route path=":id" element={<EmployeeOverview />} /> 
           <Route path=":id/edit" element={<EmployeeEdit />} /> 
+          <Route path= ":id/contract" element={<Contract />} />
+          <Route path=":id/empservice_record" element={<EmpServiceRecord />} />
         </Route>
         <Route path="service-record" element={<ServiceRecord />} />
         <Route path="position-management">
@@ -39,6 +44,7 @@ export default function App() {
         </Route>
         <Route path="retirement" element={<Retirements />} />
         <Route path="school-calendar" element={<SchoolCalendar />} />
+        <Route path="appointment-details" element={<AppointmentDetails />} />
       </Route>
       
       <Route path="user" element={<UserDashboard />} />

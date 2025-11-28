@@ -17,9 +17,9 @@ const EmployeeOverview = () => {
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
-        const res = await fetch(`${API_URL}/employee/${id}`);
+        const res = await fetch(`${API_URL}/employee/personal_info/${id}`);
         const data = await res.json();
-        setEmployee(data.data)
+        setEmployee(data)
       } catch (err) {
         setError("Failed to fetch employee data.")
       } finally {
@@ -71,7 +71,7 @@ const EmployeeOverview = () => {
               CSC Form 212
             </Button>
             <Button variant="outline">Leave Credits</Button>
-            <Button variant="outline">Service Records</Button>
+            <Button variant="outline" onClick={() => navigate(`/employees/${id}/empservice_record`)}>Service Records</Button>
             <Button variant="outline">Performance Rating</Button>
           </div>
         </CardContent>

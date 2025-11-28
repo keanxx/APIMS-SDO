@@ -43,7 +43,7 @@ const EmployeeTable = ({ searchValue, department, district, position }) => {
     const fetchEmployees = async () => {
       try {
         setIsLoading(true)
-        const response = await axios.get(`${API_URL}/employee/with_workstation`, {
+        const response = await axios.get(`${API_URL}/employee/employees-with-workstation`, {
           params: {
             page: currentPage,
             search: searchValue || '',
@@ -53,7 +53,7 @@ const EmployeeTable = ({ searchValue, department, district, position }) => {
           },
         })
 
-        setEmployees(response.data.data || [])
+        setEmployees(response.data.results || [])
         setMaxPage(response.data.max_page || 1)
         setTotalEmployees(response.data.total_records || 0)
       } catch (error) {

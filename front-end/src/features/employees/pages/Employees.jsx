@@ -19,7 +19,7 @@ const Employees = () => {
     const fetchEmployees = async () => {
       try {
         // Fetch all employees for filtering
-        const response = await axios.get(`${API_URL}/employee/with_workstation?page=1&limit=1000`);
+        const response = await axios.get(`${API_URL}/employee/employees-with-workstation?page=1&limit=1000`);
         setAllEmployees(response.data.data || []);
       } catch (error) {
         console.error("❌ Fetch failed:", error);

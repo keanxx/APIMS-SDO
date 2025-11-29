@@ -8,7 +8,7 @@ import PersonalTab from "../components/PersonalTab"
 import EligibilityTab from "../components/EligibilityTab"
 
 const EmployeeEdit = () => {
-  const { id } = useParams()
+  const { employee_id } = useParams()
   const navigate = useNavigate()
 
 
@@ -17,9 +17,9 @@ const EmployeeEdit = () => {
   return (
     <div className="space-y-4 bg-[#F7F9F7] p-6">
       <h1 className="md:text-2xl text-xl font-semibold text-[#1A3A1A]">
-        CSC Form 212 - {id}
+        CSC Form 212 - {employee_id}
       </h1>
-      <Button variant="outline" onClick={() => navigate(`/employees/${id}`)}>
+      <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}`)}>
         ← Back to List
       </Button>
 
@@ -36,13 +36,13 @@ const EmployeeEdit = () => {
 
             {/* Personal Information Tab */}
          <TabsContent value="personal">
-          <PersonalTab employeeId = {id}/>
+          <PersonalTab employeeId = {employee_id}/>
 
         </TabsContent>
 
          {/* Family Information Tab */}
          <TabsContent value="family">
-  <FamilyTab employeeId={id} />
+  <FamilyTab employeeId={employee_id} />
 </TabsContent>
 
          {/* Education Information Tab */}
@@ -52,7 +52,7 @@ const EmployeeEdit = () => {
 
 
         <TabsContent value="eligibility">
-            <EligibilityTab employeeId={id} />
+            <EligibilityTab employeeId={employee_id} />
           </TabsContent>
           </Tabs>
           

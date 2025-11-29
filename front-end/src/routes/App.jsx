@@ -12,13 +12,13 @@ import PositionManagement from "../features/position/pages/PositionManagement";
 import Position from "@/features/position/pages/Position";
 import Items from "@/features/position/pages/Items";
 import Salary from "@/features/position/pages/Salary";
-import ServiceRecord from "@/features/service_record/pages/ServiceRecord";
 import UserDashboard from "@/features/user/pages/UserDashboard";
 import AppointmentDetails from "@/features/appointment/pages/AppointmentDetails";
 import Contract from "@/features/employees/pages/service-record/Contract";
 import EmpServiceRecord from "@/features/employees/pages/service-record/EmpServiceRecord";
 import Contracts from "@/features/appointment/pages/Contracts";
 import Appointments from "@/features/appointment/pages/Appoinments";
+import LeaveCredits from "@/features/employees/pages/leave-credits/LeaveCredits";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -32,12 +32,13 @@ export default function App() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="employees">
           <Route index element={<Employees />} />
-          <Route path=":id" element={<EmployeeOverview />} /> 
-          <Route path=":id/edit" element={<EmployeeEdit />} /> 
-          <Route path= ":id/contract" element={<Contract />} />
-          <Route path=":id/empservice_record" element={<EmpServiceRecord />} />
+          <Route path=":employee_id" element={<EmployeeOverview />} /> 
+          <Route path=":employee_id/edit" element={<EmployeeEdit />} /> 
+          <Route path= ":employee_id/contract" element={<Contract />} />
+          <Route path=":employee_id/empservice_record" element={<EmpServiceRecord />} />
+          <Route path=":employee_id/leave-credits" element={<LeaveCredits />} />
         </Route>
-        <Route path="service-record" element={<ServiceRecord />} />
+    
         <Route path="position-management">
           <Route index element={<PositionManagement />} />
           <Route path="position" element={<Position />} />

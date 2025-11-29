@@ -15,8 +15,6 @@ const sidebarItems = [
       { path: "/position-management/salary", label: "Salary Tranches" },
     ],
   },
-
-  { path: "/service-record", label: "Service Record", icon: Heart },
   { path: "/school-calendar", label: "School/Calendar Year", icon: Calendar },
   { path: "/appointment-details", label: "Appointments & Contracts", icon: Briefcase,
     children:[

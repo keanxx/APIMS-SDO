@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 const EmployeeOverview = () => {
-  const { id } = useParams()
+  const { employee_id } = useParams()
   const navigate = useNavigate()
   const [employee, setEmployee] = useState()
   const [loading, setLoading] = useState(true)
@@ -17,7 +17,7 @@ const EmployeeOverview = () => {
   useEffect(() => {
     const fetchEmployee = async () => {
       try {
-        const res = await fetch(`${API_URL}/employee/personal_info/${id}`);
+        const res = await fetch(`${API_URL}/employee/personal_info/${employee_id}`);
         const data = await res.json();
         setEmployee(data)
       } catch (err) {
@@ -28,7 +28,7 @@ const EmployeeOverview = () => {
     }
 
     fetchEmployee()
-  }, [id, API_URL])
+  }, [employee_id, API_URL])
 
     if (loading) return <div className="p-6">Loading...</div>
   if (error) return <div className="p-6 text-red-600">{error}</div>
@@ -67,11 +67,11 @@ const EmployeeOverview = () => {
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-3">
-           <Button onClick={() => navigate(`/employees/${id}/edit`)}>
+           <Button onClick={() => navigate(`/employees/${employee_id}/edit`)}>
               CSC Form 212
             </Button>
-            <Button variant="outline">Leave Credits</Button>
-            <Button variant="outline" onClick={() => navigate(`/employees/${id}/empservice_record`)}>Service Records</Button>
+            <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}/leave-credits`)}>Leave Credits</Button>
+            <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}/empservice_record`)}>Service Records</Button>
             <Button variant="outline">Performance Rating</Button>
           </div>
         </CardContent>

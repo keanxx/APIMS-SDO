@@ -19,6 +19,10 @@ import EmpServiceRecord from "@/features/employees/pages/service-record/EmpServi
 import Contracts from "@/features/appointment/pages/Contracts";
 import Appointments from "@/features/appointment/pages/Appoinments";
 import LeaveCredits from "@/features/employees/pages/leave-credits/LeaveCredits";
+import MainLayout from "@/features/user/components/MainLayout";
+import Eligibility from "@/features/user/pages/Eligibility";
+import Leave from "@/features/user/pages/Leave";
+import Profile from "@/features/user/pages/Profile";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,7 +58,14 @@ export default function App() {
         </Route>
       </Route>
       
-      <Route path="user" element={<UserDashboard />} />
+      
+      {/* USER SIDE */}
+  <Route element={<MainLayout />}>
+    <Route path="/user/dashboard" element={<UserDashboard />} />
+    <Route path="/user/leave" element={<Leave />} />
+    <Route path="/user/eligibility" element={<Eligibility />} />
+    <Route path="/user/profile" element={<Profile />} />
+  </Route>
     </Routes>
    
     </>

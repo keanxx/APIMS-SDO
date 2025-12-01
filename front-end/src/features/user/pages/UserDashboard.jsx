@@ -1,7 +1,7 @@
 
 import React from 'react'
-import HeaderUser from '../components/HeaderUser'
-import Trainings from '../components/Trainings'
+import HeaderUser from '../components/dashboard/HeaderUser'
+import Trainings from '../components/dashboard/Trainings'
 
 const UserDashboard = () => {
   return (

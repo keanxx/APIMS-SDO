@@ -6,6 +6,7 @@ import FamilyTab from "../components/FamilyTab"
 import EducationTab from "../components/EducationTab"
 import PersonalTab from "../components/PersonalTab"
 import EligibilityTab from "../components/EligibilityTab"
+import PublicationTab from "../components/PublicationTab"
 
 const EmployeeEdit = () => {
   const { employee_id } = useParams()
@@ -31,7 +32,7 @@ const EmployeeEdit = () => {
               <TabsTrigger value="family">Family</TabsTrigger>
               <TabsTrigger value="education">Education</TabsTrigger>
               <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
-              <TabsTrigger value="other">Tranings</TabsTrigger>
+              <TabsTrigger value="publication">Publication</TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
@@ -54,6 +55,11 @@ const EmployeeEdit = () => {
         <TabsContent value="eligibility">
             <EligibilityTab employeeId={employee_id} />
           </TabsContent>
+    
+    <TabsContent value="publication">
+            <PublicationTab employeeId={employee_id} />
+          </TabsContent>
+
           </Tabs>
           
         </CardContent>

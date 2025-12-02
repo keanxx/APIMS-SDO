@@ -7,6 +7,12 @@ import EducationTab from "../components/EducationTab"
 import PersonalTab from "../components/PersonalTab"
 import EligibilityTab from "../components/EligibilityTab"
 import PublicationTab from "../components/PublicationTab"
+import InvolvementTab from "../components/InvolvementTab"
+import TrainingsTab from "../components/TrainingsTab"
+import MembershipTab from "../components/MembershipTab"
+import ScholarshipTab from "../components/ScholarshipTab"
+import RecognitionTab from "../components/RecognitionTab"
+import ResearchInnovationTab from "../components/ResearchInnovationTab"
 
 const EmployeeEdit = () => {
   const { employee_id } = useParams()
@@ -31,8 +37,14 @@ const EmployeeEdit = () => {
               <TabsTrigger value="personal">Personal</TabsTrigger>
               <TabsTrigger value="family">Family</TabsTrigger>
               <TabsTrigger value="education">Education</TabsTrigger>
+              <TabsTrigger value="involvement">Involvement</TabsTrigger>
+              <TabsTrigger value="trainings">Trainings</TabsTrigger>
               <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
               <TabsTrigger value="publication">Publication</TabsTrigger>
+              <TabsTrigger value="membership">Membership</TabsTrigger>
+              <TabsTrigger value="scholarship">Scholarship</TabsTrigger>
+              <TabsTrigger value="recognition">Recognition</TabsTrigger>
+              <TabsTrigger value="research_innovation">Research & Innovation</TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
@@ -48,7 +60,7 @@ const EmployeeEdit = () => {
 
          {/* Education Information Tab */}
          <TabsContent value="education">
-           <EducationTab />
+           <EducationTab employeeId={employee_id} />
          </TabsContent>
 
 
@@ -59,6 +71,37 @@ const EmployeeEdit = () => {
     <TabsContent value="publication">
             <PublicationTab employeeId={employee_id} />
           </TabsContent>
+
+          <TabsContent value="involvement">
+            <InvolvementTab employeeId={employee_id} />
+          </TabsContent>
+
+          <TabsContent value="trainings">
+            <TrainingsTab employeeId={employee_id} />
+          </TabsContent>
+
+         
+
+          <TabsContent value="membership">
+            <MembershipTab employeeId={employee_id} />
+          </TabsContent>
+
+          <TabsContent value="scholarship">
+            <ScholarshipTab employeeId={employee_id} />
+          </TabsContent>
+
+          <TabsContent value="recognition">
+            <RecognitionTab employeeId={employee_id} />
+          </TabsContent>
+
+            <TabsContent value="recognition">
+              <RecognitionTab employeeId={employee_id} />
+            </TabsContent>
+
+            <TabsContent value="research_innovation">
+              <ResearchInnovationTab employeeId={employee_id} />
+            </TabsContent>
+
 
           </Tabs>
           

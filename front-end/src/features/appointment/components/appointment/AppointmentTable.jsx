@@ -10,6 +10,7 @@ import { Modal, Flex, Button, Text } from "@mantine/core";
 import axios from "axios";
 
 import AddAppointmentModal from "./AddAppointmentModal";
+import EditAppointmentModal from "./EditAppointmentModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -18,6 +19,10 @@ const AppointmentTable = () => {
   const [fileUrl, setFileUrl] = useState(null);
   const [fileOpened, setFileOpened] = useState(false);
   const [addOpened, setAddOpened] = useState(false);
+  const [editOpened, setEditOpened] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [deleteOpened, setDeleteOpened] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
 
   const fetchAppointments = async () => {
     try {
@@ -36,13 +41,25 @@ const AppointmentTable = () => {
     fetchAppointments();
   }, []);
 
+  const handleDeleteAppointment = async () => {
+    if (!appointmentToDelete) return;
+    try {
+      await axios.delete(`${API_URL}/appointment/${appointmentToDelete.id}`);
+      setDeleteOpened(false);
+      setAppointmentToDelete(null);
+      fetchAppointments();
+    } catch (err) {
+      console.error("Error deleting appointment:", err);
+    }
+  };
+
   const columns = useMemo(
     () => [
-      { accessorKey: "id", header: "ID" },
+      { accessorKey: "employer_id", header: "ID" },
       { accessorKey: "name", header: "Full Name" },
-      { accessorKey: "workstation", header: "Workstation" },
+      { accessorKey: "workstation_name", header: "Workstation" },
       { accessorKey: "status", header: "Status" },
-      { accessorKey: "item_no", header: "Item No" },
+      { accessorKey: "item_id", header: "Item No" },
       { accessorKey: "nature", header: "Nature" },
       { accessorKey: "start_date", header: "Start Date" },
       { accessorKey: "end_date", header: "End Date" },
@@ -61,6 +78,36 @@ const AppointmentTable = () => {
           >
             View
           </Button>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        Cell: ({ row }) => (
+          <Flex gap="xs">
+            <Button
+              size="xs"
+              variant="light"
+              color="blue"
+              onClick={() => {
+                setSelectedAppointment(row.original);
+                setEditOpened(true);
+              }}
+            >
+              Edit
+            </Button>
+            <Button
+              size="xs"
+              variant="light"
+              color="red"
+              onClick={() => {
+                setAppointmentToDelete(row.original);
+                setDeleteOpened(true);
+              }}
+            >
+              Delete
+            </Button>
+          </Flex>
         ),
       },
     ],
@@ -118,6 +165,32 @@ const AppointmentTable = () => {
         onClose={() => setAddOpened(false)}
         onAdded={fetchAppointments}
       />
+
+      {/* EDIT APPOINTMENT MODAL */}
+      <EditAppointmentModal
+        opened={editOpened}
+        onClose={() => setEditOpened(false)}
+        appointment={selectedAppointment}
+        onUpdated={fetchAppointments}
+      />
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        opened={deleteOpened}
+        onClose={() => setDeleteOpened(false)}
+        title="Confirm Delete"
+        centered
+      >
+        <Text>Are you sure you want to delete this appointment?</Text>
+        <Flex mt="md" gap="sm" justify="flex-end">
+          <Button variant="light" onClick={() => setDeleteOpened(false)}>
+            Cancel
+          </Button>
+          <Button color="red" onClick={handleDeleteAppointment}>
+            Delete
+          </Button>
+        </Flex>
+      </Modal>
 
       <MantineReactTable table={table} />
     </>

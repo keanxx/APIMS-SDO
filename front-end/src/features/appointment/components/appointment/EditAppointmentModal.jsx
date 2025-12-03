@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { SearchableDropdown } from "@/components/SearchableDropdown";
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger 
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { SearchableDropdown } from "@/components/SearchableDropdown";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
+const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
   const [workstations, setWorkstations] = useState([]);
   const [workstationTypes, setWorkstationTypes] = useState([]);
   const [selectedType, setSelectedType] = useState("");
@@ -20,15 +18,42 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
 
   const [formData, setFormData] = useState({
     employee_id: "",
-  item_no: "",
-  status: "",
-  nature: "",
-  start_date: "",
-  end_date: "",
-  workstation: "",
-  file: null,
-  id:null,
+    employee_name: "",
+    item_no: "",
+    position: "",
+    salary_grade: "",
+    status: "",
+    nature: "",
+    start_date: "",
+    end_date: "",
+    workstation: "",
+    workstation_type: "",
+    file: null,
+    id: null,
   });
+
+  useEffect(() => {
+    if (appointment) {
+      const selectedItem = items.find(i => i.value === appointment.item_no);
+
+      setFormData({
+        employee_id: appointment.employee_id || "",
+        employee_name: appointment.name || "",
+        item_no: appointment.item_no || "",
+        position: selectedItem?.position?.position || appointment.position || "",
+        salary_grade: selectedItem?.position?.tranche?.salary_grade || appointment.salary_grade || "",
+        status: appointment.status || "",
+        nature: appointment.nature || "",
+        start_date: appointment.start_date || "",
+        end_date: appointment.end_date || "",
+        workstation: appointment.workstation || "",
+        workstation_type: appointment.workstation_type || "",
+        file: null,
+        id: appointment.id || null,
+      });
+      setSelectedType(appointment.workstation_type || "");
+    }
+  }, [appointment, items]); // include items as dependency
 
   // Fetch workstations
   useEffect(() => {
@@ -63,11 +88,6 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
     }
   }, [selectedType, workstations]);
 
-  const selectedWs = workstations.find(
-    (ws) => ws.workstation_id === formData.workstation_id
-  );
-  const workstationType = selectedWs?.workstation_type || "";
-
   // Fetch items
   useEffect(() => {
     const fetchItems = async () => {
@@ -87,6 +107,24 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
     fetchItems();
   }, []);
 
+  useEffect(() => {
+    if (appointment && appointment.employee_id) {
+      axios.get(`${API_URL}/employee/names?employer_id=${formData.employee_id}`)
+        .then(res => {
+          if (res.data && res.data.employee_id) {
+            setFormData(prev => ({
+              ...prev,
+              employee_id: res.data.employee_id, // human-readable ID
+              id: appointment.employee_id, // keep UUID for submission
+            }));
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching employee public ID:", err);
+        });
+    }
+  }, [appointment]);
+
   const handleEmployeeIdBlur = async () => {
     if (!formData.employee_id) return;
 
@@ -96,7 +134,7 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
         const e = res.data[0];
         const fullName = `${e.f_name} ${e.m_name || ""} ${e.l_name}`.trim();
         formData.id = e.id;
-        setFormData(prev => ({ ...prev, employee_name: fullName }));
+        setFormData(prev => ({ ...prev, employee_name: fullName, id: e.id }));
       } else {
         setFormData(prev => ({ ...prev, employee_name: "Not Found" }));
       }
@@ -106,45 +144,34 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
     }
   };
 
-const handleSubmit = async () => {
-  try {
-    const fd = new FormData();
-    fd.append("employee_id", formData.id); // UUID
-    fd.append("item_no", formData.item_no);         // UUID
-    fd.append("status", formData.status);
-    fd.append("nature", formData.nature);
-    fd.append("start_date", formData.start_date);
-    fd.append("end_date", formData.end_date || ""); // allow null/empty
-    fd.append("workstation", formData.workstation); // UUID
-    fd.append("file", formData.file);               // binary
+  const handleSubmit = async () => {
+    try {
+      const fd = new FormData();
+      fd.append("employee_id", formData.id || formData.employee_id); // UUID
+      fd.append("item_no", formData.item_no);
+      fd.append("status", formData.status);
+      fd.append("nature", formData.nature);
+      fd.append("start_date", formData.start_date);
+      fd.append("end_date", formData.end_date || "");
+      fd.append("workstation", formData.workstation);
+      if (formData.file) fd.append("file", formData.file);
 
-    await axios.post(`${API_URL}/appointment/upload_and_create`, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+      await axios.put(`${API_URL}/appointment/update/${formData.id}`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    setFormData({
-      employee_id: "",
-      item_no: "",
-      status: "",
-      nature: "",
-      start_date: "",
-      end_date: "",
-      workstation: "",
-      file: null,
-    });
-
-    onClose();
-    onAdded();
-  } catch (err) {
-    console.error("Error adding appointment:", err);
-  }
-};
+      onClose();
+      onUpdated();
+    } catch (err) {
+      console.error("Error updating appointment:", err);
+    }
+  };
 
   return (
     <Dialog open={opened} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Appointment</DialogTitle>
+          <DialogTitle>Edit Appointment</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 mt-2">
@@ -170,7 +197,7 @@ const handleSubmit = async () => {
               value={selectedType}
               onValueChange={value => {
                 setSelectedType(value);
-                setFormData({ ...formData, workstation_type: value, workstation_id: "" });
+                setFormData({ ...formData, workstation_type: value, workstation: "" });
               }}
             >
               <SelectTrigger className={"w-full"}>
@@ -188,67 +215,65 @@ const handleSubmit = async () => {
 
           {/* Workstation Name */}
           <SearchableDropdown
-  items={filteredWorkstations}
-  value={formData.workstation}
-  onChange={value => setFormData({ ...formData, workstation: value })}
-  placeholder="Select workstation"
-/>
+            items={filteredWorkstations}
+            value={formData.workstation}
+            onChange={value => setFormData({ ...formData, workstation: value })}
+            placeholder="Select workstation"
+          />
 
-         <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            {/* Status */}
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={value => setFormData({ ...formData, status: value })}
+              >
+                <SelectTrigger className={"w-full"}>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Permanent">Permanent</SelectItem>
+                  <SelectItem value="Temporary">Temporary</SelectItem>
+                  <SelectItem value="Substitute">Substitute</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-         
-
-          {/* Status */}
-          <div>
-            <Label>Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={value => setFormData({ ...formData, status: value })}
-            >
-              <SelectTrigger className={"w-full"}>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Permanent">Permanent</SelectItem>
-                <SelectItem value="Temporary">Temporary</SelectItem>
-                <SelectItem value="Substitute">Substitute</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Nature */}
+            <div>
+              <Label>Nature</Label>
+              <Select
+                value={formData.nature}
+                onValueChange={value => setFormData({ ...formData, nature: value })}
+              >
+                <SelectTrigger className={"w-full"}>
+                  <SelectValue placeholder="Select nature" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Reclassification">Reclassification</SelectItem>
+                  <SelectItem value="Original">Original</SelectItem>
+                  <SelectItem value="Promotion">Promotion</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Nature */}
-          <div>
-            <Label>Nature</Label>
-            <Select
-              value={formData.nature}
-              onValueChange={value => setFormData({ ...formData, nature: value })}
-            >
-              <SelectTrigger className={"w-full"}>
-                <SelectValue placeholder="Select nature" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Reclassification">Reclassification</SelectItem>
-                <SelectItem value="Original">Original</SelectItem>
-                <SelectItem value="Promotion">Promotion</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-</div>
           {/* Item No */}
           <div>
             <Label>Item No.</Label>
             <Select
-  value={formData.item_no}
-  onValueChange={value => {
-    const selectedItem = items.find(item => item.value === value);
-    setFormData({
-      ...formData,
-      item_no: value,
-      position: selectedItem?.position?.position || "",
-      salary_grade: selectedItem?.position?.tranche?.salary_grade || "",
-    });
-  }}
->
+              value={formData.item_no}
+              onValueChange={value => {
+                const selectedItem = items.find(item => item.value === value);
+                setFormData({
+                  ...formData,
+                  item_no: value,
+                  position: selectedItem?.position?.position || "",
+                  salary_grade: selectedItem?.position?.tranche?.salary_grade || "",
+                });
+              }}
+            >
               <SelectTrigger className={"w-full"}>
                 <SelectValue placeholder="Select Item No." />
               </SelectTrigger>
@@ -264,11 +289,10 @@ const handleSubmit = async () => {
 
           {/* Position & Salary Grade */}
           <div className="grid grid-cols-2 gap-4">
-               <Input label="Position" value={formData.position} readOnly />
-          <Input label="Salary Grade" value={formData.salary_grade ? "SG " + formData.salary_grade : ""} readOnly />
-
+            <Input label="Position" value={formData.position} readOnly />
+            <Input label="Salary Grade" value={formData.salary_grade ? "SG " + formData.salary_grade : ""} readOnly />
           </div>
-         
+
           {/* Dates */}
           <Input
             type="date"
@@ -290,7 +314,7 @@ const handleSubmit = async () => {
           />
 
           <Button onClick={handleSubmit} className="mt-4">
-            Submit
+            Save Changes
           </Button>
         </div>
       </DialogContent>
@@ -298,4 +322,4 @@ const handleSubmit = async () => {
   );
 };
 
-export default AddAppointmentModal;
+export default EditAppointmentModal;

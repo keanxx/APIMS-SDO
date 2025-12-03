@@ -1,5 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+
+import {
+  MantineReactTable,
+  useMantineReactTable,
+  MRT_GlobalFilterTextInput,
+  MRT_ToggleFiltersButton,
+} from "mantine-react-table";
+
+import { Box, Button, Flex, Modal, Text } from "@mantine/core";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -8,17 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -26,7 +28,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const ItemsTable = () => {
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-
+  const [editingId, setEditingId] = useState(null);
   // Position dropdown
   const [positions, setPositions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState("");
@@ -35,32 +37,30 @@ const ItemsTable = () => {
     item_id: "",
     availability: true,
     times_tamp: "",
-    subtitute: false,
-    remarks: "",
+    subtitute: true,
+    remarks: null,
     position_id: "",
   });
 
-  // Fetch ALL positions (for dropdown)
+  // Fetch positions
   const fetchPositions = async () => {
     try {
       const res = await axios.get(`${API_URL}/position/all`);
-
       const formatted = res.data.map((pos) => ({
         value: pos.id,
         label: pos.position,
       }));
-
       setPositions(formatted);
     } catch (error) {
       console.error("Error fetching positions:", error);
     }
   };
 
-  // Fetch item list
+  // Fetch items
   const fetchItems = async () => {
     try {
       const response = await axios.get(`${API_URL}/ItemTable/all`);
-      setItems(response.data.data || []);
+      setItems(response.data || []);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -70,114 +70,196 @@ const ItemsTable = () => {
     fetchItems();
   }, []);
 
-  // Open dialog → also load positions
   const openAddDialog = () => {
     fetchPositions();
     setOpenDialog(true);
   };
 
-  // Handle text changes
+   const openEditDialog = (item) => {
+    fetchPositions();
+
+    setEditingId(item.id);
+
+    setSelectedPosition(item.position?.id || "");
+
+    setFormData({
+      item_id: item.item_id,
+      availability: item.availability,
+      times_tamp: item.times_tamp || "",
+      subtitute: item.subtitute,
+      remarks: item.remarks,
+      position_id: item.position?.id || "",
+    });
+
+    setOpenDialog(true);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit Add Item
   const handleAddItem = async () => {
     try {
       await axios.post(`${API_URL}/ItemTable`, {
         ...formData,
-        position_id: selectedPosition, // dropdown
-        availability: formData.availability === "true",
-        subtitute: formData.subtitute === "true",
+        position_id: selectedPosition,
+        availability: formData.availability,
+        subtitute: formData.subtitute,
       });
 
       fetchItems();
       setOpenDialog(false);
 
-      // Reset form
       setSelectedPosition("");
       setFormData({
         item_id: "",
         availability: true,
         times_tamp: "",
         subtitute: false,
-        remarks: "",
+        remarks: null,
         position_id: "",
       });
     } catch (error) {
       console.error("Error adding item:", error);
     }
   };
+const handleUpdateItem = async () => {
+    try {
+      await axios.put(`${API_URL}/ItemTable/${editingId}`, {
+        ...formData,
+        position_id: selectedPosition,
+      });
+
+      fetchItems();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error updating item:", error);
+    }
+  };
+
+
+     const handleDelete = async (employeeId) => {
+      if (!confirm("Are you sure you want to delete this Item/Plantilla?")) return;
+    
+      try {
+        await axios.delete(`${API_URL}/ItemTable/${employeeId}`);
+        fetchItems(); // refresh table after deletion
+      } catch (error) {
+        console.error("Delete error:", error);
+      }
+    };
+  // -----------------------
+  // 📌 MANTINE TABLE CONFIG
+  // -----------------------
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "position.position",
+        header: "Position",
+        Cell: ({ cell }) => cell.getValue() || "—",
+      },
+      {
+        accessorKey: "item_id",
+        header: "Item / Plantilla",
+      },
+      {
+        accessorKey: "availability",
+        header: "Availability",
+        Cell: ({ cell }) =>
+          cell.getValue() ? (
+            <span style={{ color: "green", fontWeight: "600" }}>Available</span>
+          ) : (
+            <span style={{ color: "red", fontWeight: "600" }}>Unavailable</span>
+          ),
+      },
+      {
+        accessorKey: "position.tranche.salary_grade",
+        header: "Salary Grade",
+        Cell: ({ cell }) => cell.getValue() || "—",
+      },
+      {
+        accessorKey: "times_tamp",
+        header: "Date Released",
+      },
+            {
+        header: "Actions",
+        Cell: ({ row }) => (
+        <div>
+          <Button size="xs" onClick={() => openEditDialog(row.original)}>
+            Edit
+          </Button>
+
+          <Button size="xs" onClick={() => handleDelete(row.original.id)}>
+            Delete
+          </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const table = useMantineReactTable({
+    columns,
+    data: items,
+    enableColumnFilters: true,
+    enableSorting: true,
+    enableGlobalFilter: true,
+    enablePagination: true,
+    initialState: {
+      showGlobalFilter: true,
+      pagination: { pageSize: 10 },
+    },
+
+    renderTopToolbar: ({ table }) => (
+      <Flex
+        p="md"
+        justify="space-between"
+        align="center"
+        style={{ width: "100%" }}
+      >
+        <Flex gap="md" align="center">
+          <MRT_GlobalFilterTextInput table={table} />
+          <MRT_ToggleFiltersButton table={table} />
+        </Flex>
+
+        <Button onClick={openAddDialog}>Add Item</Button>
+      </Flex>
+    ),
+  });
 
   return (
-    <div className="flex flex-wrap">
+    <>
       <Card className="px-5 w-full">
-        <CardHeader className="flex flex-row justify-between items-center">
+        <CardHeader>
           <CardTitle>Items List</CardTitle>
-          <Button onClick={openAddDialog}>Add Item</Button>
         </CardHeader>
 
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Position</TableHead>
-                <TableHead>Item / Plantilla</TableHead>
-                <TableHead>Availability</TableHead>
-                <TableHead>Date Released</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {items.length > 0 ? (
-                items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.position?.position}</TableCell>
-                    <TableCell>{item.item_id}</TableCell>
-
-                    <TableCell
-                      className={
-                        item.availability
-                          ? "text-green-600 font-semibold"
-                          : "text-red-600 font-semibold"
-                      }
-                    >
-                      {item.availability ? "Available" : "Unavailable"}
-                    </TableCell>
-
-                    <TableCell>{item.times_tamp}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-gray-500 py-4">
-                    No items found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <MantineReactTable table={table} />
         </CardContent>
       </Card>
 
-      {/* ADD ITEM DIALOG */}
+      {/* ----------------------- */}
+      {/* 📌 ADD ITEM DIALOG */}
+      {/* ----------------------- */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Item</DialogTitle>
+            <DialogTitle>
+              {editingId ? "Edit Item" : "Add Item"}
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
-
-            {/* POSITION DROPDOWN HERE */}
             <div>
               <Label>Position</Label>
               <SearchableDropdown
                 items={positions}
                 value={selectedPosition}
                 onChange={setSelectedPosition}
-                placeholder="Select a Position"
               />
             </div>
 
@@ -194,8 +276,13 @@ const ItemsTable = () => {
               <Label>Availability</Label>
               <select
                 name="availability"
-                onChange={handleInputChange}
-                value={formData.availability}
+                value={formData.availability ? "true" : "false"}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    availability: e.target.value === "true",
+                  }))
+                }
                 className="border p-2 w-full rounded"
               >
                 <option value="true">Available</option>
@@ -207,12 +294,17 @@ const ItemsTable = () => {
               <Label>Substitute</Label>
               <select
                 name="subtitute"
-                onChange={handleInputChange}
-                value={formData.subtitute}
+                value={formData.subtitute ? "true" : "false"}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    subtitute: e.target.value === "true",
+                  }))
+                }
                 className="border p-2 w-full rounded"
               >
-                <option value="false">No</option>
                 <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
             </div>
 
@@ -240,11 +332,16 @@ const ItemsTable = () => {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAddItem}>Save</Button>
+
+            {editingId ? (
+              <Button onClick={handleUpdateItem}>Update</Button>
+            ) : (
+              <Button onClick={handleAddItem}>Save</Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

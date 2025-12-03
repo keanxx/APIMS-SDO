@@ -35,8 +35,8 @@ const EmpServiceRecord = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <Button variant="outline" onClick={() => navigate(`/employees/${id}`)}>
-        ← Back to Profile
+      <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}`)}>
+        ← Back to Overview
       </Button>
 
       <Card>

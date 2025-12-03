@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import FamilyTab from "../components/FamilyTab"
 import EducationTab from "../components/EducationTab"
 import PersonalTab from "../components/PersonalTab"
@@ -13,21 +13,22 @@ import MembershipTab from "../components/MembershipTab"
 import ScholarshipTab from "../components/ScholarshipTab"
 import RecognitionTab from "../components/RecognitionTab"
 import ResearchInnovationTab from "../components/ResearchInnovationTab"
+import SkillsTab from "../components/SkillsTab"
 
 const EmployeeEdit = () => {
   const { employee_id } = useParams()
   const navigate = useNavigate()
-
-
+  const location = useLocation()
+  const employeeName = location.state?.employeeName || ""
 
 
   return (
     <div className="space-y-4 bg-[#F7F9F7] p-6">
       <h1 className="md:text-2xl text-xl font-semibold text-[#1A3A1A]">
-        CSC Form 212 - {employee_id}
+        CSC Form 212 - {employeeName}
       </h1>
       <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}`)}>
-        ← Back to List
+        ← Back to Overview
       </Button>
 
       <Card>
@@ -45,6 +46,7 @@ const EmployeeEdit = () => {
               <TabsTrigger value="scholarship">Scholarship</TabsTrigger>
               <TabsTrigger value="recognition">Recognition</TabsTrigger>
               <TabsTrigger value="research_innovation">Research & Innovation</TabsTrigger>
+              <TabsTrigger value="skills">Skills</TabsTrigger>
             </TabsList>
 
             {/* Personal Information Tab */}
@@ -102,6 +104,9 @@ const EmployeeEdit = () => {
               <ResearchInnovationTab employeeId={employee_id} />
             </TabsContent>
 
+            <TabsContent value="skills">
+              <SkillsTab employeeId={employee_id} />
+            </TabsContent>
 
           </Tabs>
           

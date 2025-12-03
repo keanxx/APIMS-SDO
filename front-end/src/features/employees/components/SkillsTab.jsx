@@ -14,10 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const MembershipTab = ({ employeeId }) => {
+const SkillsTab = ({ employeeId }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [records, setRecords] = useState([]);
-  const [membership, setMembership] = useState("");
+  const [skill, setSkill] = useState("");
   const [open, setOpen] = useState(false);
 
   // For editing
@@ -28,9 +28,9 @@ const MembershipTab = ({ employeeId }) => {
   const fetchData = async () => {
     try {
       const res = await axios.get(
-        `${API_URL}/skills-membership/employee/${employeeId}/membership`
+        `${API_URL}/skills-membership/employee/${employeeId}/skills`
       );
-      setRecords(res.data.memberships || []);
+      setRecords(res.data.skills || []);
     } catch (err) {
       console.error(err);
     }
@@ -42,7 +42,7 @@ const MembershipTab = ({ employeeId }) => {
 
   // Open Add Dialog
   const openAdd = () => {
-    setMembership("");
+    setSkill("");
     setIsEditing(false);
     setEditingId(null);
     setOpen(true);
@@ -50,7 +50,7 @@ const MembershipTab = ({ employeeId }) => {
 
   // Open Edit Dialog
   const openEdit = (item) => {
-    setMembership(item.membership);
+    setSkill(item.skill);
     setIsEditing(true);
     setEditingId(item.id);
     setOpen(true);
@@ -61,8 +61,8 @@ const MembershipTab = ({ employeeId }) => {
     e.preventDefault();
 
     const payload = {
-      skills: null,
-      membership: membership || null,
+      skills: skill,
+      membership:null,
       employee_id: employeeId,
     };
 
@@ -75,7 +75,7 @@ const MembershipTab = ({ employeeId }) => {
         await axios.post(`${API_URL}/skills-membership/`, payload);
       }
 
-      setMembership("");
+      setSkill("");
       setIsEditing(false);
       setEditingId(null);
       setOpen(false);
@@ -86,7 +86,7 @@ const MembershipTab = ({ employeeId }) => {
     }
   };
      const handleDelete = async (employeeId) => {
-        if (!confirm("Are you sure you want to delete this membership?")) return;
+        if (!confirm("Are you sure you want to delete this skill?")) return;
       
         try {
           await axios.delete(`${API_URL}/skills-membership/${employeeId}`);
@@ -101,7 +101,7 @@ const MembershipTab = ({ employeeId }) => {
     <div className="space-y-4">
       <Card>
         <CardHeader className="flex justify-between items-center">
-          <CardTitle>Memberships</CardTitle>
+          <CardTitle>Skills</CardTitle>
 
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
@@ -111,22 +111,22 @@ const MembershipTab = ({ employeeId }) => {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {isEditing ? "Edit Membership" : "Add Membership"}
+                  {isEditing ? "Edit Skill" : "Add Skill"}
                 </DialogTitle>
                 <DialogDescription>
                   {isEditing
-                    ? "Update this membership."
-                    : "Enter a new membership."}
+                    ? "Update this skill."
+                    : "Enter a new skill."}
                 </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label>Membership</Label>
+                  <Label>Skills</Label>
                   <Input
-                    value={membership}
-                    onChange={(e) => setMembership(e.target.value)}
-                    placeholder="Enter membership"
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                    placeholder="Enter skill"
                   />
                 </div>
 
@@ -149,7 +149,7 @@ const MembershipTab = ({ employeeId }) => {
                   className="border p-3 rounded-md flex justify-between"
                 >
                   <div>
-                    <p>{item.membership}</p>
+                    <p>{item.skill}</p>
                   </div>
 
                   <Button
@@ -178,4 +178,4 @@ const MembershipTab = ({ employeeId }) => {
   );
 };
 
-export default MembershipTab;
+export default SkillsTab;

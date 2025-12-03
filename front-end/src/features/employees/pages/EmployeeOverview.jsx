@@ -67,9 +67,17 @@ const EmployeeOverview = () => {
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-3">
-           <Button onClick={() => navigate(`/employees/${employee_id}/edit`)}>
-              CSC Form 212
-            </Button>
+          <Button
+  onClick={() =>
+    navigate(`/employees/${employee_id}/edit`, {
+      state: {
+        employeeName: `${employee.f_name} ${employee.m_name} ${employee.l_name}`,
+      },
+    })
+  }
+>
+  CSC Form 212
+</Button>
             <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}/leave-credits`)}>Leave Credits</Button>
             <Button variant="outline" onClick={() => navigate(`/employees/${employee_id}/empservice_record`)}>Service Records</Button>
             <Button variant="outline">Performance Rating</Button>

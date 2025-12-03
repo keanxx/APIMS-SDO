@@ -115,7 +115,6 @@ const EmployeeTable = ({ searchValue, department, district, position }) => {
                 <TableHead>Employee</TableHead>
                 <TableHead>Position</TableHead>
                 <TableHead>Department</TableHead>
-                <TableHead>District</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -148,8 +147,7 @@ const EmployeeTable = ({ searchValue, department, district, position }) => {
                       </div>
                     </TableCell>
                     <TableCell>{employee.position_name || '—'}</TableCell>
-                    <TableCell>{employee.department_name || '—'}</TableCell>
-                    <TableCell>{employee.district_name || '—'}</TableCell>
+                    <TableCell>{employee.workstation_name || '—'}</TableCell>
                     <TableCell className="flex gap-2">
                       <Button
                         className="bg-[#F7F9F7] border border-[#7CB342] text-[#2D5A2D]"

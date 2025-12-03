@@ -15,8 +15,9 @@ export default function LeaveCredits() {
   const [leaveData, setLeaveData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [openCreate, setOpenCreate] = useState(false); // dialog state
-  const [form, setForm] = useState({ employee_id: "", points: "", types: "", status: "" });
+  const [openCreate, setOpenCreate] = useState(false); 
+  const [form, setForm] = useState({ points: "", types: "", status: "" });
+
 
     const [openEdit, setOpenEdit] = useState(false);
   const [editForm, setEditForm] = useState({ points: "", types: "", status: "" });
@@ -26,7 +27,7 @@ export default function LeaveCredits() {
   const fetchData = async () => {
     try {
       const res = await axios.get(`${API_URL}/leave_points/${employee_id}`);
-      setLeaveData(res.data);        // <-- SAVE DATA HERE
+      setLeaveData(res.data);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -38,16 +39,21 @@ export default function LeaveCredits() {
     fetchData();
   }, [employee_id]);
 
-  const handleCreate = async () => {
-    try {
-      await axios.post(`${API_URL}/leave_points/add`, { ...form, employee_id });
-      setForm({ employee_id: "", points: "", types: "", status: "" });
-      setOpenCreate(false);
-      fetchData();
-    } catch (error) {
-      console.error("Create error:", error);
-    }
-  };
+
+const handleCreate = async () => {
+  try {
+await axios.post(`${API_URL}/leave_points/add/${employee_id}`, form);
+    setForm({
+      points: "",
+      types: "",
+      status: "",
+    });
+    setOpenCreate(false);
+    fetchData();
+  } catch (error) {
+    console.error("Create error:", error);
+  }
+};
 
 
 const openEditDialog = (item) => {
@@ -108,19 +114,13 @@ const handleDelete = async (leaveId) => {
             </DialogHeader>
 
             <div className="grid gap-4">
-               <div>
-  <Label>Employee ID</Label>
-  <Input
-    value={editForm.employee_id}
-    onChange={(e) =>
-      setEditForm({ ...editForm, employee_id: e.target.value })
-    }
-  />
-</div>
+              
+
 
               <div>
                 <Label>Points</Label>
                 <Input
+                  type="number"
                   value={form.points}
                   onChange={(e) => setForm({ ...form, points: e.target.value })}
                 />

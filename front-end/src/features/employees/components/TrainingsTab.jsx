@@ -31,7 +31,7 @@ const TrainingsTab = ({ employeeId }) => {
     certificate: null,
   });
 
-  // Fetch all training records for this employee
+  // Fetch trainings
   const fetchTrainings = async () => {
     try {
       const res = await axios.get(`${API_URL}/trainings/${employeeId}`);
@@ -45,13 +45,12 @@ const TrainingsTab = ({ employeeId }) => {
     if (employeeId) fetchTrainings();
   }, [employeeId]);
 
-  // Handle changes for text/date inputs
+  // Input change handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file input
   const handleFileChange = (e) => {
     setFormData((prev) => ({ ...prev, certificate: e.target.files[0] }));
   };
@@ -83,36 +82,38 @@ const TrainingsTab = ({ employeeId }) => {
       sponsor: rec.sponsor,
       participant_type: rec.participant_type,
       level: rec.level,
-      certificate: null,
+      certificate: null, // file can be re-uploaded if needed
     });
     setIsEditing(true);
     setEditingId(rec.id);
     setOpenDialog(true);
   };
 
-  // Add / Edit Submit
+  // Submit Add/Edit
   const handleSubmit = async () => {
     try {
-      const payload = new FormData();
-      payload.append("title", formData.title);
-      payload.append("from_date", formData.from_date);
-      payload.append("to_date", formData.to_date);
-      payload.append("hours", formData.hours);
-      payload.append("sponsor", formData.sponsor);
-      payload.append("participant_type", formData.participant_type);
-      payload.append("level", formData.level);
-      payload.append("employee_id", employeeId);
+      const dataToSend = new FormData();
+      dataToSend.append("title", formData.title);
+      dataToSend.append("from_date", formData.from_date);
+      dataToSend.append("to_date", formData.to_date);
+      dataToSend.append("hours", formData.hours);
+      dataToSend.append("participant_type", formData.participant_type);
+      dataToSend.append("sponsor", formData.sponsor);
+      dataToSend.append("level", formData.level);
+      dataToSend.append("employee_id", employeeId);
 
       if (formData.certificate) {
-        payload.append("certificate", formData.certificate);
+        dataToSend.append("file", formData.certificate);
       }
 
       if (isEditing && editingId) {
-        await axios.put(`${API_URL}/trainings/${editingId}`, payload, {
+        // Edit training
+        await axios.put(`${API_URL}/trainings/${editingId}`, dataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await axios.post(`${API_URL}/trainings`, payload, {
+        // Add new training
+        await axios.post(`${API_URL}/trainings/upload_and_create`, dataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -121,17 +122,27 @@ const TrainingsTab = ({ employeeId }) => {
       setOpenDialog(false);
       setIsEditing(false);
       setEditingId(null);
+      setFormData({
+        title: "",
+        from_date: "",
+        to_date: "",
+        hours: "",
+        sponsor: "",
+        participant_type: "",
+        level: "",
+        certificate: null,
+      });
     } catch (error) {
       console.error("Error saving training:", error);
     }
   };
 
   // Delete training
-  const handleDelete = async (id) => {
+  const handleDelete = async (training_id) => {
     if (!confirm("Are you sure you want to delete this training?")) return;
 
     try {
-      await axios.delete(`${API_URL}/trainings/${id}`);
+      await axios.delete(`${API_URL}/trainings/${training_id}`);
       fetchTrainings();
     } catch (error) {
       console.error("Error deleting training:", error);
@@ -152,7 +163,6 @@ const TrainingsTab = ({ employeeId }) => {
           <Card key={rec.id} className="shadow-sm">
             <CardHeader className="flex justify-between items-center">
               <CardTitle>{rec.title}</CardTitle>
-
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => openEditDialog(rec)}>
                   Edit
@@ -162,7 +172,6 @@ const TrainingsTab = ({ employeeId }) => {
                 </Button>
               </div>
             </CardHeader>
-
             <CardContent className="space-y-2">
               <div>
                 <Label>Date:</Label>
@@ -170,35 +179,26 @@ const TrainingsTab = ({ employeeId }) => {
                   {rec.from_date} → {rec.to_date}
                 </p>
               </div>
-
               <div>
                 <Label>Hours:</Label>
                 <p>{rec.hours}</p>
               </div>
-
               <div>
                 <Label>Sponsor:</Label>
                 <p>{rec.sponsor}</p>
               </div>
-
               <div>
                 <Label>Level:</Label>
                 <p>{rec.level}</p>
               </div>
-
               <div>
                 <Label>Participant Type:</Label>
                 <p>{rec.participant_type}</p>
               </div>
-
               {rec.signed_url && (
                 <div>
                   <Label>Certificate:</Label>
-                  <a
-                    href={rec.signed_url}
-                    target="_blank"
-                    className="text-blue-600 underline"
-                  >
+                  <a href={rec.signed_url} target="_blank" className="text-blue-600 underline">
                     View Certificate
                   </a>
                 </div>
@@ -222,39 +222,32 @@ const TrainingsTab = ({ employeeId }) => {
               <Label>Title</Label>
               <Input name="title" value={formData.title} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>From Date</Label>
               <Input type="date" name="from_date" value={formData.from_date} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>To Date</Label>
               <Input type="date" name="to_date" value={formData.to_date} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>Hours</Label>
               <Input name="hours" type="number" value={formData.hours} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>Sponsor</Label>
               <Input name="sponsor" value={formData.sponsor} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>Participant Type</Label>
               <Input name="participant_type" value={formData.participant_type} onChange={handleInputChange} />
             </div>
-
             <div>
               <Label>Level</Label>
               <Input name="level" value={formData.level} onChange={handleInputChange} />
             </div>
-
             <div>
-              <Label>Certificate File (optional)</Label>
+              <Label>Certificate File</Label>
               <Input type="file" onChange={handleFileChange} />
             </div>
           </div>
@@ -263,9 +256,7 @@ const TrainingsTab = ({ employeeId }) => {
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit}>
-              {isEditing ? "Update" : "Save"}
-            </Button>
+            <Button onClick={handleSubmit}>{isEditing ? "Update" : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

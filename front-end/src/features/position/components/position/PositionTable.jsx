@@ -155,7 +155,6 @@ const PositionTable = () => {
               <TableHead>Position</TableHead>
               <TableHead>Classification</TableHead>
               <TableHead>Salary Grade</TableHead>
-              <TableHead>Salary Code</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -166,7 +165,6 @@ const PositionTable = () => {
                 <TableCell>{position.position}</TableCell>
                 <TableCell>{position.classification}</TableCell>
                 <TableCell>{position.tranche.salary_grade}</TableCell>
-                <TableCell>{position.tranche.code}</TableCell>
                 <TableCell>
                   <Button
                     size="sm"

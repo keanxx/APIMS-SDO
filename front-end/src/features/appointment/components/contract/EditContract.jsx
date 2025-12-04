@@ -36,8 +36,8 @@ const EditContract = ({
       setFormData({
         employee_id: contract.employer_id || "",
         employee_name: `${contract.f_name} ${contract.m_name || ""} ${contract.l_name}`.trim(),
-        position_id: contract.position_id || "",
-        workstation: contract.workstation_id || "",
+        position_id: contract.position || "",
+        workstation: contract.workstation || "",
         status: contract.status || "",
         salary: contract.salary || "",
         start_date: contract.start_date || "",
@@ -94,7 +94,7 @@ const EditContract = ({
           <Label>Position</Label>
           <SearchableDropdown
             items={positions}
-            value={selectedPosition}
+            value={formData.position_id}
             onChange={(value) => {
               setSelectedPosition(value);
               setFormData((prev) => ({ ...prev, position_id: value }));
@@ -105,10 +105,10 @@ const EditContract = ({
           <Label>Workstation</Label>
           <SearchableDropdown
             items={workstations}
-            value={selectedWorkstation}
+            value={formData.workstation}
             onChange={(value) => {
               setSelectedWorkstation(value);
-              setFormData((prev) => ({ ...prev, workstation: value }));
+              setFormData((contract) => ({ ...contract, workstation: value }));
             }}
           />
         </div>

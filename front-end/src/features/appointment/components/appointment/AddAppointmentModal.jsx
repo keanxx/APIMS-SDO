@@ -39,7 +39,9 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
         setWorkstations(data);
 
         const types = [...new Set(data.map(ws => ws.workstation_type))];
-        setWorkstationTypes(types.map(type => ({ value: type, label: type })));
+        setWorkstationTypes(types.map(type => ({ 
+          value: type, 
+          label: type })));
       } catch (error) {
         console.error("Error fetching workstations:", error);
       }
@@ -55,6 +57,7 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
         .map(ws => ({
           value: ws.workstation_id,
           label: ws.workstation_name,
+          school:ws.beis_school_id,
           ...ws,
         }));
       setFilteredWorkstations(filtered);
@@ -190,14 +193,18 @@ const handleSubmit = async () => {
           <SearchableDropdown
   items={filteredWorkstations}
   value={formData.workstation}
-  onChange={value => setFormData({ ...formData, workstation: value })}
+  onChange={value => setFormData({ ...formData, workstation: value,  school: filteredWorkstations.find(ws => ws.value === value)?.school || ""  })}
   placeholder="Select workstation"
 />
 
+{selectedType === "school" && (
+  <>
+    <Label>School ID</Label>
+    <Input value={formData.school || ""} readOnly />
+  </>
+)}
+
          <div className="grid grid-cols-2 gap-4">
-
-         
-
           {/* Status */}
           <div>
             <Label>Status</Label>

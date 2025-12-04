@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
+import { useRef, useEffect } from "react"
 import FamilyTab from "../components/FamilyTab"
 import EducationTab from "../components/EducationTab"
 import PersonalTab from "../components/PersonalTab"
@@ -20,7 +21,13 @@ const EmployeeEdit = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const employeeName = location.state?.employeeName || ""
+  const tabsListRef = useRef(null);
 
+  useEffect(() => {
+    if (tabsListRef.current) {
+      tabsListRef.current.scrollLeft = 0;
+    }
+  }, []);
 
   return (
     <div className="space-y-4 bg-[#F7F9F7] p-6">
@@ -32,91 +39,155 @@ const EmployeeEdit = () => {
       </Button>
 
       <Card>
-        <CardContent>
+        <CardContent className="pb-4">
           <Tabs defaultValue="personal">
-            <TabsList className="mb-4 flex w-full overflow-x-auto ">
-              <TabsTrigger value="personal">Personal</TabsTrigger>
-              <TabsTrigger value="family">Family</TabsTrigger>
-              <TabsTrigger value="education">Education</TabsTrigger>
-              <TabsTrigger value="involvement">Involvement</TabsTrigger>
-              <TabsTrigger value="trainings">Trainings</TabsTrigger>
-              <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
-              <TabsTrigger value="publication">Publication</TabsTrigger>
-              <TabsTrigger value="membership">Membership</TabsTrigger>
-              <TabsTrigger value="scholarship">Scholarship</TabsTrigger>
-              <TabsTrigger value="recognition">Recognition</TabsTrigger>
-              <TabsTrigger value="research_innovation">Research & Innovation</TabsTrigger>
-              <TabsTrigger value="skills">Skills</TabsTrigger>
-            </TabsList>
+            <div className="w-full overflow-x-auto">
+              <TabsList
+                ref={tabsListRef}
+                className="inline-flex whitespace-nowrap scroll-smooth w-full min-w-max md:h-[50px] h-[40px] mb-4"
+              >
+                <TabsTrigger
+                  value="personal"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Personal
+                </TabsTrigger>
+                <TabsTrigger
+                  value="family"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Family
+                </TabsTrigger>
+                <TabsTrigger
+                  value="education"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Education
+                </TabsTrigger>
+                <TabsTrigger
+                  value="involvement"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Involvement
+                </TabsTrigger>
+                <TabsTrigger
+                  value="trainings"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Trainings
+                </TabsTrigger>
+                <TabsTrigger
+                  value="eligibility"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Eligibility
+                </TabsTrigger>
+                <TabsTrigger
+                  value="publication"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Publication
+                </TabsTrigger>
+                <TabsTrigger
+                  value="membership"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Membership
+                </TabsTrigger>
+                <TabsTrigger
+                  value="scholarship"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Scholarship
+                </TabsTrigger>
+                <TabsTrigger
+                  value="recognition"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Recognition
+                </TabsTrigger>
+                <TabsTrigger
+                  value="research_innovation"
+                  className="flex-shrink-0 min-w-[140px] py-4 px-4"
+                >
+                  Research & Innovation
+                </TabsTrigger>
+                <TabsTrigger
+                  value="skills"
+                  className="flex-shrink-0 min-w-[120px] py-4 px-4"
+                >
+                  Skills
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* Personal Information Tab */}
-         <TabsContent value="personal">
-          <PersonalTab employeeId = {employee_id}/>
+            <TabsContent value="personal">
+              <PersonalTab employeeId = {employee_id}/>
+            </TabsContent>
 
-        </TabsContent>
+            {/* Family Information Tab */}
+            <TabsContent value="family">
+              <FamilyTab employeeId={employee_id} />
+            </TabsContent>
 
-         {/* Family Information Tab */}
-         <TabsContent value="family">
-  <FamilyTab employeeId={employee_id} />
-</TabsContent>
-
-         {/* Education Information Tab */}
-         <TabsContent value="education">
-           <EducationTab employeeId={employee_id} />
-         </TabsContent>
+            {/* Education Information Tab */}
+            <TabsContent value="education">
+              <EducationTab employeeId={employee_id} />
+            </TabsContent>
 
 
-        <TabsContent value="eligibility">
-            <EligibilityTab employeeId={employee_id} />
-          </TabsContent>
-    
-    <TabsContent value="publication">
-            <PublicationTab employeeId={employee_id} />
-          </TabsContent>
+            <TabsContent value="eligibility">
+                <EligibilityTab employeeId={employee_id} />
+              </TabsContent>
+        
+        <TabsContent value="publication">
+                <PublicationTab employeeId={employee_id} />
+              </TabsContent>
 
-          <TabsContent value="involvement">
-            <InvolvementTab employeeId={employee_id} />
-          </TabsContent>
+              <TabsContent value="involvement">
+                <InvolvementTab employeeId={employee_id} />
+              </TabsContent>
 
-          <TabsContent value="trainings">
-            <TrainingsTab employeeId={employee_id} />
-          </TabsContent>
+              <TabsContent value="trainings">
+                <TrainingsTab employeeId={employee_id} />
+              </TabsContent>
+
+             
+
+              <TabsContent value="membership">
+                <MembershipTab employeeId={employee_id} />
+              </TabsContent>
+
+              <TabsContent value="scholarship">
+                <ScholarshipTab employeeId={employee_id} />
+              </TabsContent>
+
+              <TabsContent value="recognition">
+                <RecognitionTab employeeId={employee_id} />
+              </TabsContent>
+
+                <TabsContent value="recognition">
+                  <RecognitionTab employeeId={employee_id} />
+                </TabsContent>
+
+                <TabsContent value="research_innovation">
+                  <ResearchInnovationTab employeeId={employee_id} />
+                </TabsContent>
+
+                <TabsContent value="skills">
+                  <SkillsTab employeeId={employee_id} />
+                </TabsContent>
+
+              </Tabs>
+              
+            </CardContent>
 
          
-
-          <TabsContent value="membership">
-            <MembershipTab employeeId={employee_id} />
-          </TabsContent>
-
-          <TabsContent value="scholarship">
-            <ScholarshipTab employeeId={employee_id} />
-          </TabsContent>
-
-          <TabsContent value="recognition">
-            <RecognitionTab employeeId={employee_id} />
-          </TabsContent>
-
-            <TabsContent value="recognition">
-              <RecognitionTab employeeId={employee_id} />
-            </TabsContent>
-
-            <TabsContent value="research_innovation">
-              <ResearchInnovationTab employeeId={employee_id} />
-            </TabsContent>
-
-            <TabsContent value="skills">
-              <SkillsTab employeeId={employee_id} />
-            </TabsContent>
-
-          </Tabs>
-          
-        </CardContent>
-
-     
-        
-      </Card>
-    </div>
-  )
-}
-
-export default EmployeeEdit
+            
+          </Card>
+        </div>
+      )
+    }
+    
+    export default EmployeeEdit

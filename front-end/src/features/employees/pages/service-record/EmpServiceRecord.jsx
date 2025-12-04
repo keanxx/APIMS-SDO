@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 
 const EmpServiceRecord = () => {
-  const { id } = useParams(); // employee_id
+  const { employee_id } = useParams(); // employee_id
   const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -16,7 +16,7 @@ const EmpServiceRecord = () => {
   useEffect(() => {
     const loadRecords = async () => {
       try {
-        const response = await axios.get(`${API_URL}/service_records/${id}`);
+        const response = await axios.get(`${API_URL}/service_records/${employee_id}`);
         const result = response.data ||
           [];
 
@@ -29,7 +29,7 @@ const EmpServiceRecord = () => {
     };
 
     loadRecords();
-  }, [id, API_URL]);
+  }, [employee_id, API_URL]);
 
   if (loading) return <div className="p-6">Loading service records...</div>;
 

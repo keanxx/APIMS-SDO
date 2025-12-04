@@ -35,9 +35,11 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
   useEffect(() => {
     if (appointment) {
       const selectedItem = items.find(i => i.value === appointment.item_no);
+       const selectedWs = workstations.find(ws => ws.workstation_id === appointment.workstation);
 
       setFormData({
-        employee_id: appointment.employee_id || "",
+        appointment_id : appointment.id ,
+        employee_id: appointment.employer_id || "",
         employee_name: appointment.name || "",
         item_no: appointment.item_no || "",
         position: selectedItem?.position?.position || appointment.position || "",
@@ -48,12 +50,13 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
         end_date: appointment.end_date || "",
         workstation: appointment.workstation || "",
         workstation_type: appointment.workstation_type || "",
-        file: null,
-        id: appointment.id || null,
+          school: selectedWs?.beis_school_id || "",
+        file: null,   
+        id: appointment.employee_id || null,
       });
       setSelectedType(appointment.workstation_type || "");
     }
-  }, [appointment, items]); // include items as dependency
+  }, [appointment]); 
 
   // Fetch workstations
   useEffect(() => {
@@ -80,6 +83,7 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
         .map(ws => ({
           value: ws.workstation_id,
           label: ws.workstation_name,
+          school:ws.beis_school_id,
           ...ws,
         }));
       setFilteredWorkstations(filtered);
@@ -107,46 +111,34 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
     fetchItems();
   }, []);
 
-  useEffect(() => {
-    if (appointment && appointment.employee_id) {
-      axios.get(`${API_URL}/employee/names?employer_id=${formData.employee_id}`)
-        .then(res => {
-          if (res.data && res.data.employee_id) {
-            setFormData(prev => ({
-              ...prev,
-              employee_id: res.data.employee_id, // human-readable ID
-              id: appointment.employee_id, // keep UUID for submission
-            }));
-          }
-        })
-        .catch(err => {
-          console.error("Error fetching employee public ID:", err);
-        });
-    }
-  }, [appointment]);
+  const handleEmployeeIdBlur = async (e) => {
+  const employeeId = e.target.value;
+  if (!employeeId) return;
 
-  const handleEmployeeIdBlur = async () => {
-    if (!formData.employee_id) return;
-
-    try {
-      const res = await axios.get(`${API_URL}/employee/names?employer_id=${formData.employee_id}`);
-      if (res.data && res.data.length > 0) {
-        const e = res.data[0];
-        const fullName = `${e.f_name} ${e.m_name || ""} ${e.l_name}`.trim();
-        formData.id = e.id;
-        setFormData(prev => ({ ...prev, employee_name: fullName, id: e.id }));
-      } else {
-        setFormData(prev => ({ ...prev, employee_name: "Not Found" }));
-      }
-    } catch (error) {
-      console.error("Name lookup error:", error);
-      setFormData(prev => ({ ...prev, employee_name: "Error" }));
+  try {
+    const res = await axios.get(`${API_URL}/employee/names?employer_id=${employeeId}`);
+    if (res.data && res.data.length > 0) {
+      const eData = res.data[0];
+      const fullName = `${eData.f_name} ${eData.m_name || ""} ${eData.l_name}`.trim();
+      setFormData(prev => ({
+        ...prev,
+        employee_name: fullName,
+        id: eData.id, // only update id, not employee_id
+        // employee_id: employeeId, // keep user's input
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, employee_name: "Not Found" }));
     }
-  };
+  } catch (error) {
+    console.error("Name lookup error:", error);
+    setFormData(prev => ({ ...prev, employee_name: "Error" }));
+  }
+};
 
   const handleSubmit = async () => {
     try {
       const fd = new FormData();
+      fd.append("appointment_id", formData.appointment_id);
       fd.append("employee_id", formData.id || formData.employee_id); // UUID
       fd.append("item_no", formData.item_no);
       fd.append("status", formData.status);
@@ -154,9 +146,10 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
       fd.append("start_date", formData.start_date);
       fd.append("end_date", formData.end_date || "");
       fd.append("workstation", formData.workstation);
+
       if (formData.file) fd.append("file", formData.file);
 
-      await axios.put(`${API_URL}/appointment/update/${formData.id}`, fd, {
+      await axios.put(`${API_URL}/appointment/${formData.appointment_id}`, fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -178,11 +171,12 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
           {/* Employee ID */}
           <div>
             <Label>Employee ID</Label>
-            <Input
-              value={formData.employee_id}
-              onChange={e => setFormData({ ...formData, employee_id: e.target.value })}
-              onBlur={handleEmployeeIdBlur}
-            />
+           <Input
+  value={formData.employee_id}
+  onChange={e => setFormData({ ...formData, employee_id: e.target.value })}
+  onBlur={handleEmployeeIdBlur}
+/>
+
           </div>
 
           <div>
@@ -217,9 +211,16 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
           <SearchableDropdown
             items={filteredWorkstations}
             value={formData.workstation}
-            onChange={value => setFormData({ ...formData, workstation: value })}
+            onChange={value => setFormData({ ...formData, workstation: value,school: filteredWorkstations.find(ws => ws.value === value)?.school || ""   })}
             placeholder="Select workstation"
           />
+
+          {selectedType === "school" && (
+  <>
+    <Label>School ID</Label>
+    <Input value={formData.school || ""} readOnly />
+  </>
+)}
 
           <div className="grid grid-cols-2 gap-4">
             {/* Status */}

@@ -5,7 +5,8 @@ import React from 'react'
 
 const HeaderUser = () => {
   return (
-    <div><Card className="shadow-lg border-0 bg-gradient-to-r from-[#7CB342]/10 to-[#2D5A2D]/10">
+    <div>
+      <Card className="shadow-lg border-0  bg-gradient-to-r from-[#7CB342]/10 to-[#2D5A2D]/10">
         <CardContent className="p-4 md:px-6 md:py-2">
           <div className="flex sm:flex-row items-start sm:items-center gap-3 md:gap-4">
             
@@ -19,7 +20,8 @@ const HeaderUser = () => {
             </Avatar>
           </div>
         </CardContent>
-      </Card></div>
+      </Card>
+    </div>
   )
 } 
 

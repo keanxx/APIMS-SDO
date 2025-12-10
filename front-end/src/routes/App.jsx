@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import Login from "../features/auth/pages/Login";
 import SidebarLayout from "../components/SidebarLayout";
@@ -23,51 +23,56 @@ import MainLayout from "@/features/user/components/MainLayout";
 import Eligibility from "@/features/user/pages/Eligibility";
 import Leave from "@/features/user/pages/Leave";
 import Profile from "@/features/user/pages/Profile";
+import ProtectedRoutes from "./ProtectedRoutes";
+
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   return (
-     <>
-    <Routes>
-      <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+    <>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate    to="/login" replace />} />
 
-      <Route element={<SidebarLayout />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="employees">
-          <Route index element={<Employees />} />
-          <Route path=":employee_id" element={<EmployeeOverview />} /> 
-          <Route path=":employee_id/edit" element={<EmployeeEdit />} /> 
-          <Route path= ":employee_id/contract" element={<Contract />} />
-          <Route path=":employee_id/empservice_record" element={<EmpServiceRecord />} />
-          <Route path=":employee_id/leave-credits" element={<LeaveCredits />} />
+        {/* Protected Admin/HR Routes */}
+        <Route element={<ProtectedRoutes allowedRoles={['admin', 'hr']} />}>
+          <Route element={<SidebarLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="employees">
+              <Route index element={<Employees />} />
+              <Route path=":employee_id" element={<EmployeeOverview />} /> 
+              <Route path=":employee_id/edit" element={<EmployeeEdit />} /> 
+              <Route path=":employee_id/contract" element={<Contract />} />
+              <Route path=":employee_id/empservice_record" element={<EmpServiceRecord />} />
+              <Route path=":employee_id/leave-credits" element={<LeaveCredits />} />
+            </Route>
+        
+            <Route path="position-management">
+              <Route index element={<PositionManagement />} />
+              <Route path="position" element={<Position />} />
+              <Route path="items" element={<Items />} />
+              <Route path="salary" element={<Salary />} />
+            </Route>
+            <Route path="retirement" element={<Retirements />} />
+            <Route path="school-calendar" element={<SchoolCalendar />} />
+            <Route path="appointment-details">
+              <Route index element={<AppointmentDetails />} />
+              <Route path="appointment" element={<Appointments />} />
+              <Route path="contract" element={<Contracts />} />
+            </Route>
+          </Route>
         </Route>
-    
-        <Route path="position-management">
-          <Route index element={<PositionManagement />} />
-          <Route path="position" element={<Position />} />
-          <Route path="items" element={<Items />} />
-          <Route path="salary" element={<Salary />} />
+        
+        {/* Protected User Routes */}
+        <Route element={<ProtectedRoutes allowedRoles={['user']} />}>
+          <Route element={<MainLayout />}>
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/leave" element={<Leave />} />
+            <Route path="/user/eligibility" element={<Eligibility />} />
+            <Route path="/user/profile" element={<Profile />} />
+          </Route>
         </Route>
-        <Route path="retirement" element={<Retirements />} />
-        <Route path="school-calendar" element={<SchoolCalendar />} />
-        <Route path="appointment-details">
-          <Route index element={<AppointmentDetails />} />
-          <Route path="appointment" element={<Appointments />} />
-          <Route path="contract" element={<Contracts />} />
-        </Route>
-      </Route>
-      
-      
-      {/* USER SIDE */}
-  <Route element={<MainLayout />}>
-    <Route path="/user/dashboard" element={<UserDashboard />} />
-    <Route path="/user/leave" element={<Leave />} />
-    <Route path="/user/eligibility" element={<Eligibility />} />
-    <Route path="/user/profile" element={<Profile />} />
-  </Route>
-    </Routes>
-   
+      </Routes>
     </>
   );
 }

@@ -21,10 +21,10 @@ import Appointments from "@/features/appointment/pages/Appoinments";
 import LeaveCredits from "@/features/employees/pages/leave-credits/LeaveCredits";
 import MainLayout from "@/features/user/components/MainLayout";
 import Eligibility from "@/features/user/pages/Eligibility";
-import Leave from "@/features/user/pages/Leave";
+import Leave from "@/features/user/pages/AppointmentContract.jsx";
 import Profile from "@/features/user/pages/Profile";
 import ProtectedRoutes from "./ProtectedRoutes";
-
+import AppointmentContract from "@/features/user/pages/AppointmentContract.jsx";
 
 export default function App() {
   return (
@@ -32,21 +32,27 @@ export default function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate    to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Protected Admin/HR Routes */}
-        <Route element={<ProtectedRoutes allowedRoles={['admin', 'hr']} />}>
+        <Route element={<ProtectedRoutes allowedRoles={["admin", "hr"]} />}>
           <Route element={<SidebarLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="employees">
               <Route index element={<Employees />} />
-              <Route path=":employee_id" element={<EmployeeOverview />} /> 
-              <Route path=":employee_id/edit" element={<EmployeeEdit />} /> 
+              <Route path=":employee_id" element={<EmployeeOverview />} />
+              <Route path=":employee_id/edit" element={<EmployeeEdit />} />
               <Route path=":employee_id/contract" element={<Contract />} />
-              <Route path=":employee_id/empservice_record" element={<EmpServiceRecord />} />
-              <Route path=":employee_id/leave-credits" element={<LeaveCredits />} />
+              <Route
+                path=":employee_id/empservice_record"
+                element={<EmpServiceRecord />}
+              />
+              <Route
+                path=":employee_id/leave-credits"
+                element={<LeaveCredits />}
+              />
             </Route>
-        
+
             <Route path="position-management">
               <Route index element={<PositionManagement />} />
               <Route path="position" element={<Position />} />
@@ -62,12 +68,15 @@ export default function App() {
             </Route>
           </Route>
         </Route>
-        
+
         {/* Protected User Routes */}
-        <Route element={<ProtectedRoutes allowedRoles={['user']} />}>
+        <Route element={<ProtectedRoutes allowedRoles={["user"]} />}>
           <Route element={<MainLayout />}>
             <Route path="/user/dashboard" element={<UserDashboard />} />
-            <Route path="/user/leave" element={<Leave />} />
+            <Route
+              path="/user/appointment-contract"
+              element={<AppointmentContract />}
+            />
             <Route path="/user/eligibility" element={<Eligibility />} />
             <Route path="/user/profile" element={<Profile />} />
           </Route>

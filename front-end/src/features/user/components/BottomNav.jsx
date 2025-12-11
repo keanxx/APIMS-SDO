@@ -3,9 +3,13 @@ import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { name: "Home", icon: Home, href: "/user/dashboard" },
-  { name: "Leave", icon: Calendar, href: "/user/leave" },
+  {
+    name: "Appointment Contract",
+    icon: Calendar,
+    href: "/user/appointment-contract",
+  },
   { name: "Eligibility", icon: FileText, href: "/user/eligibility" },
-  { name: "Profile", icon: User, href: "/user/profile" }
+  { name: "Profile", icon: User, href: "/user/profile" },
 ];
 
 export default function BottomNav() {

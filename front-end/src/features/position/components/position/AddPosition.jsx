@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import API from '@/api/axios'
 
 const AddPosition = () => {
     const [position, setPosition] = useState();
@@ -38,13 +39,13 @@ const AddPosition = () => {
         }
         const response = await axios.post(`${API_URL}/position/add`, payload)
       console.log("✅ Position added:", response.data)
-      alert("Position added successfully!")
+    
 
         closeDialog();
 
     } catch (error) {
       console.error("Error adding position:", error)
-      alert("Failed to add position")
+ 
     }
 }
 
@@ -62,9 +63,6 @@ const closeDialog = () => {
             setIsDialogOpen(open)
             if (!open) closeDialog()
         }}>
-            <DialogTrigger>
-                <Button>Add Position</Button>
-            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Create New Position</DialogTitle>

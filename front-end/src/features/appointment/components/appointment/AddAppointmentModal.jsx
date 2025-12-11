@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger 
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,14 +20,14 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
 
   const [formData, setFormData] = useState({
     employee_id: "",
-  item_no: "",
-  status: "",
-  nature: "",
-  start_date: "",
-  end_date: "",
-  workstation: "",
-  file: null,
-  id:null,
+    item_no: "",
+    status: "",
+    nature: "",
+    start_date: "",
+    end_date: "",
+    workstation: "",
+    file: null,
+    id: null,
   });
 
   // Fetch workstations
@@ -39,9 +39,10 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
         setWorkstations(data);
 
         const types = [...new Set(data.map(ws => ws.workstation_type))];
-        setWorkstationTypes(types.map(type => ({ 
-          value: type, 
-          label: type })));
+        setWorkstationTypes(types.map(type => ({
+          value: type,
+          label: type
+        })));
       } catch (error) {
         console.error("Error fetching workstations:", error);
       }
@@ -57,7 +58,7 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
         .map(ws => ({
           value: ws.workstation_id,
           label: ws.workstation_name,
-          school:ws.beis_school_id,
+          school: ws.beis_school_id,
           ...ws,
         }));
       setFilteredWorkstations(filtered);
@@ -71,24 +72,35 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
   );
   const workstationType = selectedWs?.workstation_type || "";
 
-  // Fetch items
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const { data } = await axios.get(`${API_URL}/ItemTable/all`);
-        const formatted = data.map((item) => ({
-          value: item.id,
-          label: item.item_id,
-          position: item.position,
-          salary_grade: item.salary_grade,
-        }));
-        setItems(formatted);
-      } catch (error) {
-        console.error("Error fetching items:", error);
-      }
-    };
-    fetchItems();
-  }, []);
+// Fetch items depending on selected status
+useEffect(() => {
+  if (!formData.status) return;
+
+  const fetchItems = async () => {
+    try {
+      const endpoint =
+        formData.status === "Substitute"
+          ? `${API_URL}/ItemTable/subtitute_items`
+          : `${API_URL}/ItemTable/available_items`;
+
+      const { data } = await axios.get(endpoint);
+
+      const formatted = data.map(item => ({
+        value: item.id,
+        label: item.item_id,
+        position: item.position,
+        salary_grade: item.salary_grade,
+      }));
+
+      setItems(formatted);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+  fetchItems();
+}, [formData.status]); // refetch whenever status changes
+
 
   const handleEmployeeIdBlur = async () => {
     if (!formData.employee_id) return;
@@ -109,39 +121,39 @@ const AddAppointmentModal = ({ opened, onClose, onAdded }) => {
     }
   };
 
-const handleSubmit = async () => {
-  try {
-    const fd = new FormData();
-    fd.append("employee_id", formData.id); // UUID
-    fd.append("item_no", formData.item_no);         // UUID
-    fd.append("status", formData.status);
-    fd.append("nature", formData.nature);
-    fd.append("start_date", formData.start_date);
-    fd.append("end_date", formData.end_date || ""); // allow null/empty
-    fd.append("workstation", formData.workstation); // UUID
-    fd.append("file", formData.file);               // binary
+  const handleSubmit = async () => {
+    try {
+      const fd = new FormData();
+      fd.append("employee_id", formData.id); // UUID
+      fd.append("item_no", formData.item_no);         // UUID
+      fd.append("status", formData.status);
+      fd.append("nature", formData.nature);
+      fd.append("start_date", formData.start_date);
+      fd.append("end_date", formData.end_date || ""); // allow null/empty
+      fd.append("workstation", formData.workstation); // UUID
+      fd.append("file", formData.file);               // binary
 
-    await axios.post(`${API_URL}/appointment/upload_and_create`, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+      await axios.post(`${API_URL}/appointment/upload_and_create`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    setFormData({
-      employee_id: "",
-      item_no: "",
-      status: "",
-      nature: "",
-      start_date: "",
-      end_date: "",
-      workstation: "",
-      file: null,
-    });
+      setFormData({
+        employee_id: "",
+        item_no: "",
+        status: "",
+        nature: "",
+        start_date: "",
+        end_date: "",
+        workstation: "",
+        file: null,
+      });
 
-    onClose();
-    onAdded();
-  } catch (err) {
-    console.error("Error adding appointment:", err);
-  }
-};
+      onClose();
+      onAdded();
+    } catch (err) {
+      console.error("Error adding appointment:", err);
+    }
+  };
 
   return (
     <Dialog open={opened} onOpenChange={onClose}>
@@ -191,71 +203,74 @@ const handleSubmit = async () => {
 
           {/* Workstation Name */}
           <SearchableDropdown
-  items={filteredWorkstations}
-  value={formData.workstation}
-  onChange={value => setFormData({ ...formData, workstation: value,  school: filteredWorkstations.find(ws => ws.value === value)?.school || ""  })}
-  placeholder="Select workstation"
-/>
+            items={filteredWorkstations}
+            value={formData.workstation}
+            onChange={value => setFormData({ ...formData, workstation: value, school: filteredWorkstations.find(ws => ws.value === value)?.school || "" })}
+            placeholder="Select workstation"
+          />
 
-{selectedType === "school" && (
-  <>
-    <Label>School ID</Label>
-    <Input value={formData.school || ""} readOnly />
-  </>
-)}
+          {selectedType === "school" && (
+            <>
+              <Label>School ID</Label>
+              <Input value={formData.school || ""} readOnly />
+            </>
+          )}
 
-         <div className="grid grid-cols-2 gap-4">
-          {/* Status */}
-          <div>
-            <Label>Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={value => setFormData({ ...formData, status: value })}
-            >
-              <SelectTrigger className={"w-full"}>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Permanent">Permanent</SelectItem>
-                <SelectItem value="Temporary">Temporary</SelectItem>
-                <SelectItem value="Substitute">Substitute</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Status */}
+            <div>
+              <Label>Status</Label>
+             <Select
+                value={formData.status}
+                onValueChange={value => {
+                  setFormData({ ...formData, status: value, item_no: "" });
+                }}
+              >
+
+                <SelectTrigger className={"w-full"}>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Permanent">Permanent</SelectItem>
+                  <SelectItem value="Temporary">Temporary</SelectItem>
+                  <SelectItem value="Substitute">Substitute</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Nature */}
+            <div>
+              <Label>Nature</Label>
+              <Select
+                value={formData.nature}
+                onValueChange={value => setFormData({ ...formData, nature: value })}
+              >
+                <SelectTrigger className={"w-full"}>
+                  <SelectValue placeholder="Select nature" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Reclassification">Reclassification</SelectItem>
+                  <SelectItem value="Original">Original</SelectItem>
+                  <SelectItem value="Promotion">Promotion</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-
-          {/* Nature */}
-          <div>
-            <Label>Nature</Label>
-            <Select
-              value={formData.nature}
-              onValueChange={value => setFormData({ ...formData, nature: value })}
-            >
-              <SelectTrigger className={"w-full"}>
-                <SelectValue placeholder="Select nature" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Reclassification">Reclassification</SelectItem>
-                <SelectItem value="Original">Original</SelectItem>
-                <SelectItem value="Promotion">Promotion</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-</div>
           {/* Item No */}
           <div>
             <Label>Item No.</Label>
             <Select
-  value={formData.item_no}
-  onValueChange={value => {
-    const selectedItem = items.find(item => item.value === value);
-    setFormData({
-      ...formData,
-      item_no: value,
-      position: selectedItem?.position?.position || "",
-      salary_grade: selectedItem?.position?.tranche?.salary_grade || "",
-    });
-  }}
->
+              value={formData.item_no}
+              onValueChange={value => {
+                const selectedItem = items.find(item => item.value === value);
+                setFormData({
+                  ...formData,
+                  item_no: value,
+                  position: selectedItem?.position?.position || "",
+                  salary_grade: selectedItem?.position?.tranche?.salary_grade || "",
+                });
+              }}
+            >
               <SelectTrigger className={"w-full"}>
                 <SelectValue placeholder="Select Item No." />
               </SelectTrigger>
@@ -271,11 +286,12 @@ const handleSubmit = async () => {
 
           {/* Position & Salary Grade */}
           <div className="grid grid-cols-2 gap-4">
-               <Input label="Position" value={formData.position} readOnly />
-          <Input label="Salary Grade" value={formData.salary_grade ? "SG " + formData.salary_grade : ""} readOnly />
+            <Input label="Position" value={formData.position} readOnly />
+            <Input label="Salary Grade" value={formData.salary_grade ? "SG " + formData.salary_grade : ""} readOnly />
 
           </div>
-         
+          {/* gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+uvicorn main:app --host 0.0.0.0 --port $PORT */}
           {/* Dates */}
           <Input
             type="date"

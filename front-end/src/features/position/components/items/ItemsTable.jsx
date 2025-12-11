@@ -8,7 +8,7 @@ import {
   MRT_ToggleFiltersButton,
 } from "mantine-react-table";
 
-import { Box, Button, Flex, Modal, Text } from "@mantine/core";
+import { Flex, Button } from "@mantine/core";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,30 +22,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
+import API from "@/api/axios";
+import { showSuccess, showError, showConfirm } from "@/utils/alerts";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ItemsTable = () => {
   const [items, setItems] = useState([]);
+  const [positions, setPositions] = useState([]);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  // Position dropdown
-  const [positions, setPositions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState("");
 
   const [formData, setFormData] = useState({
     item_id: "",
-    availability: true,
-    times_tamp: "",
-    subtitute: true,
-    remarks: null,
     position_id: "",
+    times_tamp: "",
+    availability: true,
+    subtitute: false,
+    remarks: "",
   });
 
-  // Fetch positions
+  // ------------------------------
+  // Fetch Data
+  // ------------------------------
   const fetchPositions = async () => {
     try {
-      const res = await axios.get(`${API_URL}/position/all`);
+      const res = await API.get(`/position/all`);
       const formatted = res.data.map((pos) => ({
         value: pos.id,
         label: pos.position,
@@ -56,11 +60,10 @@ const ItemsTable = () => {
     }
   };
 
-  // Fetch items
   const fetchItems = async () => {
     try {
-      const response = await axios.get(`${API_URL}/ItemTable/all`);
-      setItems(response.data || []);
+      const res = await API.get(`/ItemTable/all`);
+      setItems(res.data || []);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -70,99 +73,117 @@ const ItemsTable = () => {
     fetchItems();
   }, []);
 
+  // ------------------------------
+  // Open Dialogs
+  // ------------------------------
   const openAddDialog = () => {
     fetchPositions();
+    setEditingId(null);
+
+    setSelectedPosition("");
+    setFormData({
+      item_id: "",
+      position_id: "",
+      times_tamp: "",
+    });
+
     setOpenDialog(true);
   };
 
-   const openEditDialog = (item) => {
+  const openEditDialog = (item) => {
     fetchPositions();
-
     setEditingId(item.id);
 
     setSelectedPosition(item.position?.id || "");
 
     setFormData({
       item_id: item.item_id,
-      availability: item.availability,
+      position_id: item.position?.id || "",
       times_tamp: item.times_tamp || "",
+      availability: item.availability,
       subtitute: item.subtitute,
       remarks: item.remarks,
-      position_id: item.position?.id || "",
     });
 
     setOpenDialog(true);
   };
 
+  // ------------------------------
+  // Form Handlers
+  // ------------------------------
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ------------------------------
+  // CRUD
+  // ------------------------------
   const handleAddItem = async () => {
+    setOpenDialog(false);
+    const confirm = await showConfirm("Are you sure to add this item?");
+    if (!confirm.isConfirmed) return;
     try {
-      await axios.post(`${API_URL}/ItemTable`, {
-        ...formData,
+      await API.post(`/ItemTable`, {
+        item_id: formData.item_id,
         position_id: selectedPosition,
+        times_tamp: formData.times_tamp,
+      });
+     await showSuccess("Item added successfully.");
+      fetchItems();
+      
+    } catch (error) {
+      console.error("Add error:", error);
+    }
+  };
+
+  const handleUpdateItem = async () => {
+    setOpenDialog(false);
+    const confirm = await showConfirm("Are you sure to Update this item?");
+    if (!confirm.isConfirmed) return;
+    
+    try {
+      await API.put(`/ItemTable/${editingId}`, {
+        item_id: formData.item_id,
+        position_id: selectedPosition,
+        times_tamp: formData.times_tamp,
         availability: formData.availability,
         subtitute: formData.subtitute,
+        remarks: formData.remarks,
       });
-
+      await showSuccess("Item updated succesfully.")
       fetchItems();
-      setOpenDialog(false);
-
-      setSelectedPosition("");
-      setFormData({
-        item_id: "",
-        availability: true,
-        times_tamp: "",
-        subtitute: false,
-        remarks: null,
-        position_id: "",
-      });
+      
     } catch (error) {
-      console.error("Error adding item:", error);
+      console.error("Update error:", error);
     }
   };
-const handleUpdateItem = async () => {
+
+  const handleDelete = async (id) => {
+    const confirm = await showConfirm("Are you sure to delete this item?");
+    if (!confirm.isConfirmed) return;
+
     try {
-      await axios.put(`${API_URL}/ItemTable/${editingId}`, {
-        ...formData,
-        position_id: selectedPosition,
-      });
-
+      await API.delete(`/ItemTable/${id}`);
+      await showSuccess("Item deleted succesfully")
       fetchItems();
-      setOpenDialog(false);
     } catch (error) {
-      console.error("Error updating item:", error);
+      console.error("Delete error:", error);
     }
   };
 
-
-     const handleDelete = async (employeeId) => {
-      if (!confirm("Are you sure you want to delete this Item/Plantilla?")) return;
-    
-      try {
-        await axios.delete(`${API_URL}/ItemTable/${employeeId}`);
-        fetchItems(); // refresh table after deletion
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
-    };
-  // -----------------------
-  // 📌 MANTINE TABLE CONFIG
-  // -----------------------
-
+  // ------------------------------
+  // Table Columns
+  // ------------------------------
   const columns = useMemo(
     () => [
       {
         accessorKey: "position.position",
         header: "Position",
-        Cell: ({ cell }) => cell.getValue() || "—",
       },
       {
         accessorKey: "item_id",
-        header: "Item / Plantilla",
+        header: "Plantilla No.",
       },
       {
         accessorKey: "availability",
@@ -177,23 +198,26 @@ const handleUpdateItem = async () => {
       {
         accessorKey: "position.tranche.salary_grade",
         header: "Salary Grade",
-        Cell: ({ cell }) => cell.getValue() || "—",
       },
       {
         accessorKey: "times_tamp",
         header: "Date Released",
       },
-            {
+      {
         header: "Actions",
         Cell: ({ row }) => (
-        <div>
-          <Button size="xs" onClick={() => openEditDialog(row.original)}>
-            Edit
-          </Button>
-
-          <Button size="xs" onClick={() => handleDelete(row.original.id)}>
-            Delete
-          </Button>
+          <div className="flex gap-2">
+            <Button size="xs" variant="outline" onClick={() => openEditDialog(row.original)}>
+              Edit
+            </Button>
+            <Button
+              size="xs"
+              color="red"
+              variant="outline"
+              onClick={() => handleDelete(row.original.id)}
+            >
+              Delete
+            </Button>
           </div>
         ),
       },
@@ -214,12 +238,7 @@ const handleUpdateItem = async () => {
     },
 
     renderTopToolbar: ({ table }) => (
-      <Flex
-        p="md"
-        justify="space-between"
-        align="center"
-        style={{ width: "100%" }}
-      >
+      <Flex p="md" justify="space-between" align="center">
         <Flex gap="md" align="center">
           <MRT_GlobalFilterTextInput table={table} />
           <MRT_ToggleFiltersButton table={table} />
@@ -230,21 +249,17 @@ const handleUpdateItem = async () => {
     ),
   });
 
+  // ------------------------------
+  // DIALOG UI
+  // ------------------------------
   return (
     <>
-      <Card className="px-5 w-full">
-        <CardHeader>
-          <CardTitle>Items List</CardTitle>
-        </CardHeader>
 
-        <CardContent>
-          <MantineReactTable table={table} />
-        </CardContent>
-      </Card>
+      <MantineReactTable table={table} />
 
-      {/* ----------------------- */}
-      {/* 📌 ADD ITEM DIALOG */}
-      {/* ----------------------- */}
+
+
+      {/* ADD / EDIT Dialog */}
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -254,6 +269,7 @@ const handleUpdateItem = async () => {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* POSITION */}
             <div>
               <Label>Position</Label>
               <SearchableDropdown
@@ -263,6 +279,7 @@ const handleUpdateItem = async () => {
               />
             </div>
 
+            {/* ITEM ID */}
             <div>
               <Label>Item ID</Label>
               <Input
@@ -272,51 +289,7 @@ const handleUpdateItem = async () => {
               />
             </div>
 
-            <div>
-              <Label>Availability</Label>
-              <select
-                name="availability"
-                value={formData.availability ? "true" : "false"}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    availability: e.target.value === "true",
-                  }))
-                }
-                className="border p-2 w-full rounded"
-              >
-                <option value="true">Available</option>
-                <option value="false">Unavailable</option>
-              </select>
-            </div>
-
-            <div>
-              <Label>Substitute</Label>
-              <select
-                name="subtitute"
-                value={formData.subtitute ? "true" : "false"}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    subtitute: e.target.value === "true",
-                  }))
-                }
-                className="border p-2 w-full rounded"
-              >
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-
-            <div>
-              <Label>Remarks</Label>
-              <Input
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleInputChange}
-              />
-            </div>
-
+            {/* DATE RELEASED */}
             <div>
               <Label>Date Released</Label>
               <Input
@@ -326,8 +299,61 @@ const handleUpdateItem = async () => {
                 onChange={handleInputChange}
               />
             </div>
+
+            {/* -------------------------- */}
+            {/* SHOW EXTRA FIELDS ONLY ON EDIT */}
+            {/* -------------------------- */}
+            {editingId && (
+              <>
+                <div>
+                  <Label>Availability</Label>
+                  <select
+                    name="availability"
+                    value={formData.availability ? "true" : "false"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        availability: e.target.value === "true",
+                      }))
+                    }
+                    className="border p-2 w-full rounded"
+                  >
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label>Substitute</Label>
+                  <select
+                    name="subtitute"
+                    value={formData.subtitute ? "true" : "false"}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        subtitute: e.target.value === "true",
+                      }))
+                    }
+                    className="border p-2 w-full rounded"
+                  >
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label>Remarks</Label>
+                  <Input
+                    name="remarks"
+                    value={formData.remarks}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
+          {/* FOOTER BUTTONS */}
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
               Cancel

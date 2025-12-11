@@ -7,44 +7,66 @@ import {
 } from "mantine-react-table";
 
 import { Modal, Flex, Button, Text } from "@mantine/core";
-import axios from "axios";
-
 import AddAppointmentModal from "./AddAppointmentModal";
 import EditAppointmentModal from "./EditAppointmentModal";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import API from "@/api/axios";
 
 const AppointmentTable = () => {
   const [appointments, setAppointments] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const [fileUrl, setFileUrl] = useState(null);
   const [fileOpened, setFileOpened] = useState(false);
   const [addOpened, setAddOpened] = useState(false);
   const [editOpened, setEditOpened] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+
   const [deleteOpened, setDeleteOpened] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState(null);
 
+  // ------------------ FETCH APPOINTMENTS (SERVER SIDE) ------------------
   const fetchAppointments = async () => {
     try {
-      const res = await axios.get(`${API_URL}/appointment/paginated`);
-      const dataWithFullName = res.data.results.map((a) => ({
+      const page = pagination.pageIndex + 1;
+      const limit = pagination.pageSize;
+
+      const res = await API.get(
+        `/appointment/paginated?page=${page}&limit=${limit}`
+      );
+
+      const formatted = res.data.results.map((a) => ({
         ...a,
         name: `${a.f_name} ${a.m_name || ""} ${a.l_name}`.trim(),
       }));
-      setAppointments(dataWithFullName || []);
+
+      setAppointments(formatted);
+      setTotalCount(res.data.total_records || 0);
     } catch (err) {
       console.error("Error fetching appointments:", err);
     }
   };
 
+  // fetch on mount
   useEffect(() => {
     fetchAppointments();
   }, []);
 
+  // fetch every time pagination changes
+  useEffect(() => {
+    fetchAppointments();
+  }, [pagination.pageIndex, pagination.pageSize]);
+
+  // ------------------ DELETE HANDLER ------------------
   const handleDeleteAppointment = async () => {
     if (!appointmentToDelete) return;
+
     try {
-      await axios.delete(`${API_URL}/appointment/${appointmentToDelete.id}`);
+      await API.delete(`/appointment/${appointmentToDelete.id}`);
       setDeleteOpened(false);
       setAppointmentToDelete(null);
       fetchAppointments();
@@ -53,9 +75,10 @@ const AppointmentTable = () => {
     }
   };
 
+  // ------------------ TABLE COLUMNS ------------------
   const columns = useMemo(
     () => [
-      { accessorKey: "employer_id", header: "ID" },
+      { accessorKey: "employer_id", header: "Employee ID" },
       { accessorKey: "name", header: "Full Name" },
       { accessorKey: "workstation_name", header: "Workstation" },
       { accessorKey: "status", header: "Status" },
@@ -63,6 +86,8 @@ const AppointmentTable = () => {
       { accessorKey: "nature", header: "Nature" },
       { accessorKey: "start_date", header: "Start Date" },
       { accessorKey: "end_date", header: "End Date" },
+
+      // FILE BUTTON
       {
         id: "file",
         header: "File",
@@ -80,6 +105,8 @@ const AppointmentTable = () => {
           </Button>
         ),
       },
+
+      // ACTION BUTTONS
       {
         id: "actions",
         header: "Actions",
@@ -96,6 +123,7 @@ const AppointmentTable = () => {
             >
               Edit
             </Button>
+
             <Button
               size="xs"
               variant="light"
@@ -114,15 +142,19 @@ const AppointmentTable = () => {
     []
   );
 
+  // ------------------ MANTINE TABLE ------------------
   const table = useMantineReactTable({
     columns,
     data: appointments,
-    enableColumnFilters: true,
-    enableSorting: true,
-    enableGlobalFilter: true,
+
+    manualPagination: true,
+    rowCount: totalCount,
+
+    onPaginationChange: setPagination,
+    state: { pagination },
+
     initialState: {
       showGlobalFilter: true,
-      pagination: { pageSize: 10 },
     },
 
     renderTopToolbar: ({ table }) => (
@@ -159,14 +191,13 @@ const AppointmentTable = () => {
         )}
       </Modal>
 
-      {/* ADD APPOINTMENT MODAL */}
+      {/* ADD & EDIT */}
       <AddAppointmentModal
         opened={addOpened}
         onClose={() => setAddOpened(false)}
         onAdded={fetchAppointments}
       />
 
-      {/* EDIT APPOINTMENT MODAL */}
       <EditAppointmentModal
         opened={editOpened}
         onClose={() => setEditOpened(false)}
@@ -174,7 +205,7 @@ const AppointmentTable = () => {
         onUpdated={fetchAppointments}
       />
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE CONFIRMATION */}
       <Modal
         opened={deleteOpened}
         onClose={() => setDeleteOpened(false)}

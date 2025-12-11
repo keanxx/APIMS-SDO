@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import AddContract from "./AddContract";
 import EditContract from "./EditContract";
+import API from "@/api/axios";
 
 const ContractTable = () => {
   const [contracts, setContracts] = useState([]);
@@ -60,8 +61,8 @@ const [editingContract, setEditingContract] = useState(null);
     const page = pagination.pageIndex + 1; // MRT is 0-based
     const limit = pagination.pageSize;
 
-    const res = await axios.get(
-      `${API_URL}/contracts/paginated?page=${page}&limit=${limit}`
+    const res = await API.get(
+      `/contracts/paginated?page=${page}&limit=${limit}`
     );
 
     setContracts(res.data.results || []);

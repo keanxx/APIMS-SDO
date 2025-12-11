@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Landing from '../components/Landing'
+import API from '@/api/axios'
 
 const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate()
@@ -57,16 +58,24 @@ const handleRegister = async (e) => {
   e.preventDefault();
 
   try {
-    const res = await axios.post(`${API_URL}/auth/signin/`, {
+    const res = await API.post(`/auth/signin/`, {
       employee_id: loginData.employee_id,
       password: loginData.password,
     });
 
     if (res.status === 200) {
-      const { access_token, role } = res.data;
+      const { access_token, hr_role,workstation_hold } = res.data;
 
-      localStorage.setItem("access_token", access_token);
-      localStorage.setItem("role", role);
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("hr_role");
+    localStorage.removeItem("employee_id");
+    localStorage.removeItem("workstation_hold");
+
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("hr_role", hr_role);
+    localStorage.setItem("employee_id", loginData.employee_id);
+    localStorage.setItem("workstation_hold", workstation_hold);
+
 
       setIsLoggedIn(true);
       navigate("/dashboard");

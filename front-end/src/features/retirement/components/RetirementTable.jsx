@@ -1,81 +1,182 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useMemo, useEffect, useState } from "react";
+import {
+  MantineReactTable,
+  useMantineReactTable,
+  MRT_GlobalFilterTextInput,
+  MRT_ToggleFiltersButton,
+} from "mantine-react-table";
+import { Box, Button, Flex, Menu, Text } from "@mantine/core";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-
+import API from "@/api/axios";
 const RetirementTable = () => {
   const [retirementData, setRetirementData] = useState([]);
-  const [totalRetirements, setTotalRetirements] = useState(0);
-  const API_URL = import.meta.env.VITE_API_URL;
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [globalFilter, setGlobalFilter] = useState("");
+
+
+  const fetchRetirements = async () => {
+    try {
+      const page = pagination.pageIndex + 1; // MRT is 0-based
+      const limit = pagination.pageSize;
+
+      const res = await API.get(`retirement/`, {
+        params: {
+          page,
+          limit,
+          search: globalFilter,
+        },
+      });
+
+      setRetirementData(res.data.data || []);
+      setTotalRecords(res.data.total_count || res.data.data?.length || 0);
+    } catch (error) {
+      console.error("Error fetching retirement data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchRetirements = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/retirement/`);
-        setRetirementData(res.data.data);
-        setTotalRetirements(res.data.age_60_plus_count);
-      } catch (error) {
-        console.error("Error fetching retirement data:", error);
-      }
-    };
-
     fetchRetirements();
-  }, [API_URL]);
+  }, [pagination.pageIndex, pagination.pageSize, globalFilter]);
+
+  const columns = useMemo(
+    () => [
+      {
+        header: "Employee",
+        accessorFn: (row) =>
+          `${row.f_name} ${row.m_name ? row.m_name + "." : ""} ${row.l_name}`,
+        id: "employee",
+        size: 250,
+        Cell: ({ row }) => (
+          <Flex align="center" gap="sm">
+            <Box
+              sx={{
+                width: 35,
+                height: 35,
+                borderRadius: "50%",
+                background: "#ddd",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text size="sm" weight={500}>
+                {row.original.f_name[0]}
+                {row.original.l_name[0]}
+              </Text>
+            </Box>
+            <Box>
+              <Text>
+                {row.original.f_name}{" "}
+                {row.original.m_name ? row.original.m_name + ". " : ""}{" "}
+                {row.original.l_name}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {row.original.email_address}
+              </Text>
+            </Box>
+          </Flex>
+        ),
+      },
+      { accessorKey: "employer_id", header: "Employer ID" },
+      { accessorKey: "full_age", header: "Age" },
+      { accessorKey: "birth_date", header: "Birth Date" },
+      { accessorKey: "remarks", header: "Remarks" },
+    ],
+    []
+  );
+
+  const table = useMantineReactTable({
+    columns,
+    data: retirementData,
+
+    // SERVER-SIDE MODE
+    manualPagination: true,
+    rowCount: totalRecords,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
+    state: { pagination, globalFilter },
+
+    // FEATURES
+    enableRowSelection: true,
+    enableColumnOrdering: true,
+    enableColumnFilterModes: true,
+    enableGlobalFilter: true,
+    enablePagination: true,
+    enableColumnActions: false,
+
+    initialState: {
+      pagination: { pageIndex: 0, pageSize: 10 },
+      showGlobalFilter: true,
+    },
+
+    mantineSearchTextInputProps: { placeholder: "Search Employees" },
+  
+  mantineTableContainerProps: {
+    style: {
+      maxHeight: "calc(100vh - 200px)",   // height of scroll container
+      overflowY: "auto",
+    },
+  },
+    renderRowActionMenuItems: ({ row }) => (
+      <>
+        <Menu.Item onClick={() => alert("Profile: " + row.original.f_name)}>
+          View Profile
+        </Menu.Item>
+        <Menu.Item
+          onClick={() => alert("Email: " + row.original.email_address)}
+        >
+          Send Email
+        </Menu.Item>
+      </>
+    ),
+
+    renderTopToolbar: ({ table }) => {
+      const selected = table.getSelectedRowModel().flatRows;
+      const handleAction = (type) => {
+        selected.forEach((row) => {
+          alert(`${type}: ${row.getValue("employee")}`);
+        });
+      };
+
+      return (
+        <Flex justify="space-between" p="md">
+          <Flex gap="xs">
+            <MRT_GlobalFilterTextInput table={table} />
+            <MRT_ToggleFiltersButton table={table} />
+          </Flex>
+          <Flex gap="xs">
+            <Button
+              color="red"
+              disabled={!table.getIsSomeRowsSelected()}
+              onClick={() => handleAction("Deactivate")}
+            >
+              Deactivate
+            </Button>
+            <Button
+              color="green"
+              disabled={!table.getIsSomeRowsSelected()}
+              onClick={() => handleAction("Activate")}
+            >
+              Activate
+            </Button>
+            <Button
+              color="blue"
+              disabled={!table.getIsSomeRowsSelected()}
+              onClick={() => handleAction("Contact")}
+            >
+              Contact
+            </Button>
+          </Flex>
+        </Flex>
+      );
+    },
+  });
 
   return (
-    <Card>
-      <CardTitle className="px-5 font-light">
-        Available Retirement ({totalRetirements})
-      </CardTitle>
-      <CardContent className="h-[55vh] overflow-y-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Employee</TableHead>
-              <TableHead>Employer ID</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Birth Date</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {retirementData.length > 0 ? (
-              retirementData.map((employee) => (
-                <TableRow key={employee.employee_id}>
-                  <TableCell>
-                    <div className="flex gap-3 items-center">
-                      <Avatar>
-                        <AvatarFallback>
-                          {employee.f_name[0]}
-                          {employee.l_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p>{`${employee.f_name} ${employee.m_name}. ${employee.l_name}`}</p>
-                        <p className="text-xs text-gray-500">
-                          {employee.email_address}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{employee.employer_id}</TableCell>
-                  <TableCell>{employee.full_age}</TableCell>
-                  <TableCell>{employee.birth_date}</TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500">
-                  No retirement records found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <Box>
+      <MantineReactTable table={table} />
+    </Box>
   );
 };
 

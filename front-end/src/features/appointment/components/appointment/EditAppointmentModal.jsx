@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { SearchableDropdown } from "@/components/SearchableDropdown";
+import API from "@/api/axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+
 
 const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
   const [workstations, setWorkstations] = useState([]);
@@ -15,7 +18,7 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
   const [selectedType, setSelectedType] = useState("");
   const [filteredWorkstations, setFilteredWorkstations] = useState([]);
   const [items, setItems] = useState([]);
-
+const [lastSearchedId, setLastSearchedId] = useState("");
   const [formData, setFormData] = useState({
     employee_id: "",
     employee_name: "",
@@ -35,10 +38,10 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
   useEffect(() => {
     if (appointment) {
       const selectedItem = items.find(i => i.value === appointment.item_no);
-       const selectedWs = workstations.find(ws => ws.workstation_id === appointment.workstation);
+      const selectedWs = workstations.find(ws => ws.workstation_id === appointment.workstation);
 
       setFormData({
-        appointment_id : appointment.id ,
+        appointment_id: appointment.id,
         employee_id: appointment.employer_id || "",
         employee_name: appointment.name || "",
         item_no: appointment.item_no || "",
@@ -50,19 +53,19 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
         end_date: appointment.end_date || "",
         workstation: appointment.workstation || "",
         workstation_type: appointment.workstation_type || "",
-          school: selectedWs?.beis_school_id || "",
-        file: null,   
+        school: selectedWs?.beis_school_id || "",
+        file: null,
         id: appointment.employee_id || null,
       });
       setSelectedType(appointment.workstation_type || "");
     }
-  }, [appointment]); 
+  }, [appointment]);
 
   // Fetch workstations
   useEffect(() => {
     const fetchWorkstations = async () => {
       try {
-        const res = await axios.get(`${API_URL}/workstation/all`);
+        const res = await API.get(`/workstation/all`);
         const data = res.data.data || [];
         setWorkstations(data);
 
@@ -75,6 +78,9 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
     fetchWorkstations();
   }, []);
 
+  useEffect(() => {
+    fetchItems("all");
+  }, []);
   // Filter workstations by type
   useEffect(() => {
     if (selectedType) {
@@ -83,7 +89,7 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
         .map(ws => ({
           value: ws.workstation_id,
           label: ws.workstation_name,
-          school:ws.beis_school_id,
+          school: ws.beis_school_id,
           ...ws,
         }));
       setFilteredWorkstations(filtered);
@@ -92,48 +98,86 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
     }
   }, [selectedType, workstations]);
 
-  // Fetch items
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const { data } = await axios.get(`${API_URL}/ItemTable/all`);
-        const formatted = data.map((item) => ({
-          value: item.id,
-          label: item.item_id,
-          position: item.position,
-          salary_grade: item.salary_grade,
-        }));
-        setItems(formatted);
-      } catch (error) {
-        console.error("Error fetching items:", error);
-      }
-    };
-    fetchItems();
-  }, []);
+  const fetchItems = async (mode) => {
+    try {
+      let endpoint;
 
-  const handleEmployeeIdBlur = async (e) => {
-  const employeeId = e.target.value;
-  if (!employeeId) return;
+      if (mode === "all") {
+        endpoint = `${API_URL}/ItemTable/all`;
+      } else if (mode === "substitute") {
+        endpoint = `${API_URL}/ItemTable/subtitute_items`;
+      } else if (mode === "available") {
+        endpoint = `${API_URL}/ItemTable/available_items`;
+      }
+
+      const { data } = await API.get(endpoint);
+
+      const formatted = data.map(item => ({
+        value: item.id,
+        label: item.item_id,
+        position: item.position,
+        salary_grade: item.salary_grade,
+      }));
+
+      setItems(formatted);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+
+  // refetch whenever status changes
+
+  const resetForm = () => {
+  setFormData({
+    employee_id: "",
+    employee_name: "",
+    item_no: "",
+    position: "",
+    salary_grade: "",
+    status: "",
+    nature: "",
+    start_date: "",
+    end_date: "",
+    workstation: "",
+    workstation_type: "",
+    school: "",
+    file: null,
+    id: null,
+  });
+  setSelectedType("");
+  setFilteredWorkstations([]);
+};
+
+const handleEmployeeIdBlur = async (e) => {
+  const employeeId = e.target.value.trim();
+
+  // 🚫 Prevent spam: don't refetch if value hasn't changed
+  if (!employeeId || employeeId === lastSearchedId) return;
+
+  setLastSearchedId(employeeId);
 
   try {
-    const res = await axios.get(`${API_URL}/employee/names?employer_id=${employeeId}`);
+    const res = await API.get(`/employee/names?employer_id=${employeeId}`);
+
     if (res.data && res.data.length > 0) {
       const eData = res.data[0];
       const fullName = `${eData.f_name} ${eData.m_name || ""} ${eData.l_name}`.trim();
+
       setFormData(prev => ({
         ...prev,
         employee_name: fullName,
-        id: eData.id, // only update id, not employee_id
-        // employee_id: employeeId, // keep user's input
+        id: eData.id,
       }));
     } else {
       setFormData(prev => ({ ...prev, employee_name: "Not Found" }));
     }
+
   } catch (error) {
-    console.error("Name lookup error:", error);
-    setFormData(prev => ({ ...prev, employee_name: "Error" }));
+    console.error("Lookup error:", error);
   }
 };
+
 
   const handleSubmit = async () => {
     try {
@@ -171,11 +215,11 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
           {/* Employee ID */}
           <div>
             <Label>Employee ID</Label>
-           <Input
-  value={formData.employee_id}
-  onChange={e => setFormData({ ...formData, employee_id: e.target.value })}
-  onBlur={handleEmployeeIdBlur}
-/>
+            <Input
+              value={formData.employee_id}
+              onChange={e => setFormData({ ...formData, employee_id: e.target.value })}
+              onBlur={handleEmployeeIdBlur}
+            />
 
           </div>
 
@@ -211,25 +255,40 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
           <SearchableDropdown
             items={filteredWorkstations}
             value={formData.workstation}
-            onChange={value => setFormData({ ...formData, workstation: value,school: filteredWorkstations.find(ws => ws.value === value)?.school || ""   })}
+            onChange={value => setFormData({ ...formData, workstation: value, school: filteredWorkstations.find(ws => ws.value === value)?.school || "" })}
             placeholder="Select workstation"
           />
 
           {selectedType === "school" && (
-  <>
-    <Label>School ID</Label>
-    <Input value={formData.school || ""} readOnly />
-  </>
-)}
+            <>
+              <Label>School ID</Label>
+              <Input value={formData.school || ""} readOnly />
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             {/* Status */}
             <div>
               <Label>Status</Label>
+
               <Select
                 value={formData.status}
-                onValueChange={value => setFormData({ ...formData, status: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, status: value, item_no: "" });
+
+                  // 🔥 Fetch items IMMEDIATELY when status changes
+                  if (value === "Substitute") {
+                    fetchItems("substitute");
+                  } else if (value === "Temporary" || value === "Permanent") {
+                    fetchItems("available");
+                  } else {
+                    fetchItems("all");
+                  }
+                }}
               >
+
+
+
                 <SelectTrigger className={"w-full"}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -314,9 +373,21 @@ const EditAppointmentModal = ({ opened, onClose, appointment, onUpdated }) => {
             onChange={e => setFormData({ ...formData, file: e.target.files[0] })}
           />
 
-          <Button onClick={handleSubmit} className="mt-4">
-            Save Changes
-          </Button>
+      <div className="flex justify-end gap-3 mt-4">
+  <Button variant="outline" 
+    onClick={() => {
+      resetForm();
+      onClose();
+    }}
+  >
+    Close
+  </Button>
+
+  <Button onClick={handleSubmit}>
+    Save Changes
+  </Button>
+</div>
+
         </div>
       </DialogContent>
     </Dialog>

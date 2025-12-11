@@ -9,10 +9,10 @@ const AddressForm = ({ onAddressChange }) => {
   const [municipalities, setMunicipalities] = useState([])
   const [barangays, setBarangays] = useState([])
 
-  const [selectedRegion, setSelectedRegion] = useState("")
-  const [selectedProvince, setSelectedProvince] = useState("")
-  const [selectedMunicipality, setSelectedMunicipality] = useState("")
-  const [selectedBarangay, setSelectedBarangay] = useState("")
+  const [selectedRegion, setSelectedRegion] = useState({ code: "", name: "" })
+  const [selectedProvince, setSelectedProvince] = useState({ code: "", name: "" })
+  const [selectedMunicipality, setSelectedMunicipality] = useState({ code: "", name: "" })
+  const [selectedBarangay, setSelectedBarangay] = useState({ code: "", name: "" })
 
   const [subdivision, setSubdivision] = useState("")
   const [street, setStreet] = useState("")
@@ -20,43 +20,63 @@ const AddressForm = ({ onAddressChange }) => {
 
   // Fetch data
   useEffect(() => {
-    fetch("https://psgc.cloud/api/regions").then(res => res.json()).then(setRegions)
+    fetch("https://psgc.cloud/api/regions")
+      .then(res => res.json())
+      .then(setRegions)
   }, [])
 
   useEffect(() => {
-    if (selectedRegion)
-      fetch(`https://psgc.cloud/api/regions/${selectedRegion}/provinces`).then(res => res.json()).then(setProvinces)
-  }, [selectedRegion])
+    if (selectedRegion.code)
+      fetch(`https://psgc.cloud/api/regions/${selectedRegion.code}/provinces`)
+        .then(res => res.json())
+        .then(setProvinces)
+  }, [selectedRegion.code])
 
   useEffect(() => {
-    if (selectedProvince)
-      fetch(`https://psgc.cloud/api/provinces/${selectedProvince}/cities-municipalities`).then(res => res.json()).then(setMunicipalities)
-  }, [selectedProvince])
+    if (selectedProvince.code)
+      fetch(`https://psgc.cloud/api/provinces/${selectedProvince.code}/cities-municipalities`)
+        .then(res => res.json())
+        .then(setMunicipalities)
+  }, [selectedProvince.code])
 
   useEffect(() => {
-    if (selectedMunicipality)
-      fetch(`https://psgc.cloud/api/cities-municipalities/${selectedMunicipality}/barangays`).then(res => res.json()).then(setBarangays)
-  }, [selectedMunicipality])
+    if (selectedMunicipality.code)
+      fetch(`https://psgc.cloud/api/cities-municipalities/${selectedMunicipality.code}/barangays`)
+        .then(res => res.json())
+        .then(setBarangays)
+  }, [selectedMunicipality.code])
 
   // Send flat data to parent whenever values change
   useEffect(() => {
     onAddressChange?.({
       house_no: houseNo,
-      baranggay: selectedBarangay,
+      baranggay: selectedBarangay.name,
       street,
-      municipality: selectedMunicipality,
+      municipality: selectedMunicipality.name,
       subdivision,
-      province: selectedProvince,
+      province: selectedProvince.name,
+      region: selectedRegion.name
     })
-  }, [houseNo, street, subdivision, selectedBarangay, selectedMunicipality, selectedProvince])
+  }, [houseNo, street, subdivision, selectedBarangay, selectedMunicipality, selectedProvince, selectedRegion])
 
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Region</Label>
-          <Select onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Select region" /></SelectTrigger>
+          <Select
+            value={selectedRegion.name}
+            onValueChange={(name) => {
+              const r = regions.find(r => r.name === name)
+              setSelectedRegion({ code: r.code, name: r.name })
+              setSelectedProvince({ code: "", name: "" })
+              setSelectedMunicipality({ code: "", name: "" })
+              setSelectedBarangay({ code: "", name: "" })
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select region" />
+            </SelectTrigger>
             <SelectContent>
               {regions.map(r => (
                 <SelectItem key={r.code} value={r.name}>{r.name}</SelectItem>
@@ -67,8 +87,19 @@ const AddressForm = ({ onAddressChange }) => {
 
         <div className="space-y-1">
           <Label>Province</Label>
-          <Select disabled={!provinces.length} onValueChange={setSelectedProvince}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Select province" /></SelectTrigger>
+          <Select
+            value={selectedProvince.name}
+            disabled={!provinces.length}
+            onValueChange={(name) => {
+              const p = provinces.find(p => p.name === name)
+              setSelectedProvince({ code: p.code, name: p.name })
+              setSelectedMunicipality({ code: "", name: "" })
+              setSelectedBarangay({ code: "", name: "" })
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select province" />
+            </SelectTrigger>
             <SelectContent>
               {provinces.map(p => (
                 <SelectItem key={p.code} value={p.name}>{p.name}</SelectItem>
@@ -79,8 +110,18 @@ const AddressForm = ({ onAddressChange }) => {
 
         <div className="space-y-1">
           <Label>Municipality / City</Label>
-          <Select disabled={!municipalities.length} onValueChange={setSelectedMunicipality}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Select municipality" /></SelectTrigger>
+          <Select
+            value={selectedMunicipality.name}
+            disabled={!municipalities.length}
+            onValueChange={(name) => {
+              const m = municipalities.find(m => m.name === name)
+              setSelectedMunicipality({ code: m.code, name: m.name })
+              setSelectedBarangay({ code: "", name: "" })
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select municipality" />
+            </SelectTrigger>
             <SelectContent>
               {municipalities.map(m => (
                 <SelectItem key={m.code} value={m.name}>{m.name}</SelectItem>
@@ -91,8 +132,17 @@ const AddressForm = ({ onAddressChange }) => {
 
         <div className="space-y-1">
           <Label>Barangay</Label>
-          <Select disabled={!barangays.length} onValueChange={setSelectedBarangay}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Select barangay" /></SelectTrigger>
+          <Select
+            value={selectedBarangay.name}
+            disabled={!barangays.length}
+            onValueChange={(name) => {
+              const b = barangays.find(b => b.name === name)
+              setSelectedBarangay({ code: b.code, name: b.name })
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select barangay" />
+            </SelectTrigger>
             <SelectContent>
               {barangays.map(b => (
                 <SelectItem key={b.code} value={b.name}>{b.name}</SelectItem>

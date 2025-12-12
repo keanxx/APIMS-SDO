@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Edit2, Trash2 } from 'lucide-react';
-import { useAuth } from '@/features/auth/components/AuthContext';
-import axiosInstance from '@/api/axiosInstance';
+import React, { useState, useEffect } from "react";
+import { Sparkles, Edit2, Trash2 } from "lucide-react";
+import { useAuth } from "@/features/auth/components/AuthContext";
+import axiosInstance from "@/api/axiosInstance";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,12 +11,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { AddEditSkill } from './AddEditSkill';
+} from "@/components/ui/alert-dialog";
+import { AddEditSkill } from "./AddEditSkill";
+import { Card } from "@/components/ui/card";
 
 export function SkillSection() {
   const { user } = useAuth();
-  const [skills, setSkills] = useState([]); 
+  const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -28,13 +29,15 @@ export function SkillSection() {
       const response = await axiosInstance.get(
         `/skills-membership/employee/${user.employee_id}/skills`
       );
-      
-      console.log('Skills Response:', response.data);
-    
-      setSkills(Array.isArray(response.data.skills) ? response.data.skills : []);
+
+      console.log("Skills Response:", response.data);
+
+      setSkills(
+        Array.isArray(response.data.skills) ? response.data.skills : []
+      );
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch skills:', error);
+      console.error("Failed to fetch skills:", error);
       setSkills([]);
       setLoading(false);
     }
@@ -69,8 +72,8 @@ export function SkillSection() {
         setIsDeleteDialogOpen(false);
         setDeleteId(null);
       } catch (error) {
-        console.error('Failed to delete skill:', error);
-        alert('Failed to delete skill');
+        console.error("Failed to delete skill:", error);
+        alert("Failed to delete skill");
       }
     }
   };
@@ -105,10 +108,7 @@ export function SkillSection() {
           </div>
         ) : (
           skills.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-xl shadow-md p-4 border border-gray-100"
-            >
+            <Card key={item.id}>
               <p className="text-gray-900 mb-3">{item.skill}</p>
               <div className="flex gap-2 pt-3 border-t border-gray-100">
                 <button
@@ -126,7 +126,7 @@ export function SkillSection() {
                   Delete
                 </button>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>
@@ -146,7 +146,8 @@ export function SkillSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Skill</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this skill? This action cannot be undone.
+              Are you sure you want to delete this skill? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

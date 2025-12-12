@@ -124,6 +124,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
+                    readOnly
                     id="firstName"
                     value={formData.firstName || ""}
                     onChange={(e) =>
@@ -135,6 +136,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="middleName">Middle Name</Label>
                   <Input
+                    readOnly
                     id="middleName"
                     value={formData.middleName || ""}
                     onChange={(e) =>
@@ -148,6 +150,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
+                    readOnly
                     id="lastName"
                     value={formData.lastName || ""}
                     onChange={(e) =>
@@ -159,6 +162,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="suffix">Suffix</Label>
                   <Input
+                    readOnly
                     id="suffix"
                     value={formData.suffix || ""}
                     onChange={(e) =>
@@ -172,6 +176,7 @@ export default function EditPersonal({
               <div>
                 <Label htmlFor="dateOfBirth">Date of Birth</Label>
                 <Input
+                  readOnly
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth || ""}
@@ -184,6 +189,7 @@ export default function EditPersonal({
               <div>
                 <Label htmlFor="placeOfBirth">Place of Birth</Label>
                 <Input
+                  readOnly
                   id="placeOfBirth"
                   value={formData.placeOfBirth || ""}
                   onChange={(e) =>
@@ -193,8 +199,9 @@ export default function EditPersonal({
                 />
               </div>
               <div>
-                <Label htmlFor="gender">Gender</Label>
+                <Label htmlFor="gender">Sex</Label>
                 <Input
+                  readOnly
                   id="gender"
                   value={formData.gender || ""}
                   onChange={(e) =>
@@ -207,6 +214,7 @@ export default function EditPersonal({
               <div>
                 <Label htmlFor="civilStatus">Civil Status</Label>
                 <Input
+                  readOnly
                   id="civilStatus"
                   value={formData.civilStatus || ""}
                   onChange={(e) =>
@@ -218,6 +226,7 @@ export default function EditPersonal({
               <div>
                 <Label htmlFor="citizenship">Citizenship</Label>
                 <Input
+                  readOnly
                   id="citizenship"
                   value={formData.citizenship || ""}
                   onChange={(e) =>
@@ -230,6 +239,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="height">Height (cm)</Label>
                   <Input
+                    readOnly
                     id="height"
                     type="number"
                     value={formData.height || ""}
@@ -242,6 +252,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="weight">Weight (kg)</Label>
                   <Input
+                    readOnly
                     id="weight"
                     type="number"
                     value={formData.weight || ""}
@@ -254,6 +265,7 @@ export default function EditPersonal({
                 <div>
                   <Label htmlFor="bloodType">Blood Type</Label>
                   <Input
+                    readOnly
                     id="bloodType"
                     value={formData.bloodType || ""}
                     onChange={(e) =>

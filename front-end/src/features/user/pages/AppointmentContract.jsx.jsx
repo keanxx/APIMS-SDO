@@ -27,22 +27,28 @@ const AppointmentContract = () => {
 
       // Handle appointments response
       if (appointmentsRes.status === "fulfilled") {
+        const appointmentsData = appointmentsRes.value.data;
+        // Check if response has 'results' array
+        const appointmentsArray = appointmentsData?.results || appointmentsData;
         setAppointments(
-          Array.isArray(appointmentsRes.value.data)
-            ? appointmentsRes.value.data
-            : []
+          Array.isArray(appointmentsArray) ? appointmentsArray : []
         );
+        console.log("Appointments:", appointmentsArray);
       } else {
         console.error("Failed to fetch appointments:", appointmentsRes.reason);
+        setAppointments([]);
       }
 
       // Handle contracts response
       if (contractsRes.status === "fulfilled") {
-        setContracts(
-          Array.isArray(contractsRes.value.data) ? contractsRes.value.data : []
-        );
+        const contractsData = contractsRes.value.data;
+        // Check if response has 'results' array
+        const contractsArray = contractsData?.results || contractsData;
+        setContracts(Array.isArray(contractsArray) ? contractsArray : []);
+        console.log("Contracts:", contractsArray);
       } else {
         console.error("Failed to fetch contracts:", contractsRes.reason);
+        setContracts([]);
       }
 
       setLoading(false);
@@ -64,27 +70,28 @@ const AppointmentContract = () => {
   // Combine appointments and contracts into a single array for display
   const allRecords = [
     ...appointments.map((apt) => ({
-      id: `apt-${apt.employee_id}-${apt.item_no}`,
+      id: apt.id || `apt-${apt.employee_id}`,
       type: "appointment",
-      workstation: apt.workstation,
+      workstation: apt.workstation_name || apt.workstation,
       status: apt.status,
       itemNumber: apt.item_no,
       nature: apt.nature,
       startDate: apt.start_date,
       endDate: apt.end_date,
-      file: apt.file,
+      file: apt.signed_url || apt.file,
     })),
     ...contracts.map((contract) => ({
-      id: `contract-${contract.employee_id}-${contract.position_id}`,
+      id: contract.id || `contract-${contract.employee_id}`,
       type: "contractual",
-      workstation: contract.workstation,
+      workstation: contract.workstation_name || contract.workstation,
       status: contract.status,
-      itemNumber: contract.position_id,
-      nature: "Contract",
+      position: contract.position_name || contract.position,
+      itemNumber: contract.position,
+      nature: contract.classification || "Contract",
       startDate: contract.start_date,
       endDate: contract.end_date,
       salary: contract.salary,
-      file: contract.file,
+      file: contract.signed_url || contract.file,
     })),
   ];
 
@@ -93,6 +100,7 @@ const AppointmentContract = () => {
       case "permanent":
         return "bg-green-100 text-green-800";
       case "contractual":
+      case "bading":
         return "bg-blue-100 text-blue-800";
       case "temporary":
         return "bg-yellow-100 text-yellow-800";
@@ -151,6 +159,11 @@ const AppointmentContract = () => {
                       <p className="text-sm text-gray-600 mt-0.5">
                         {record.workstation}
                       </p>
+                      {record.position && (
+                        <p className="text-sm text-gray-700 font-medium mt-1">
+                          {record.position}
+                        </p>
+                      )}
                       <span
                         className={`inline-block text-xs px-2.5 py-1 rounded-full mt-2 ${getStatusColor(
                           record.status
@@ -169,7 +182,9 @@ const AppointmentContract = () => {
                         ? "Item Number:"
                         : "Position ID:"}
                     </span>
-                    <span className="text-gray-900">{record.itemNumber}</span>
+                    <span className="text-gray-900 break-all text-right ml-2">
+                      {record.itemNumber}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Nature:</span>

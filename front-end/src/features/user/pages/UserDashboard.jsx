@@ -288,7 +288,10 @@ export default function UserDashboard() {
   return (
     <div className="px-4 pb-6">
       {/* Profile Header Card */}
-      <Card className="mb-4 overflow-hidden" style={{ borderRadius: "12px" }}>
+      <Card
+        className="mb-4 overflow-hidden pt-0"
+        style={{ borderRadius: "12px" }}
+      >
         <div className="bg-gradient-to-r from-[#1A3A1A] to-[#2d5a2d] h-24" />
         <CardContent className="relative pt-0 px-4 pb-4">
           {/* Avatar */}

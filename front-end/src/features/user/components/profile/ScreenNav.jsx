@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChevronDown } from 'lucide-react';
+import React from "react";
+import { ChevronDown } from "lucide-react";
 
 /**
  * @typedef {Object} ScreenNavProps
@@ -12,23 +12,26 @@ import { ChevronDown } from 'lucide-react';
  */
 export function ScreenNav({ currentScreen, onScreenChange }) {
   const screens = [
-    { id: 'personal-info', name: 'Personal Information' },
-    { id: 'eligibility', name: 'Eligibility' },
-    { id: 'trainings', name: 'Training & Seminars' },
-    { id: 'service-records', name: 'Service Record' },
-    { id: 'family-background', name: 'Family Background' },
-    { id: 'educational-background', name: 'Education' },
-    { id: 'work-experience', name: 'Work Experience' },
-    { id: 'voluntary-work', name: 'Voluntary Work' },
-    { id: 'skills-recognitions', name: 'Skills & Awards' },
-    { id: 'other-information', name: 'Other Information' },
+    { id: "family-background", name: "Family Background" },
+    { id: "eligibility", name: "Eligibility" },
+    { id: "trainings", name: "Training & Seminars" },
+    { id: "service-records", name: "Service Record" },
+
+    { id: "educational-background", name: "Education" },
+    { id: "work-experience", name: "Work Experience" },
+    { id: "voluntary-work", name: "Voluntary Work" },
+    { id: "skills-recognitions", name: "Skills & Awards" },
+    { id: "other-information", name: "Other Information" },
   ];
 
-  const currentScreenName = screens.find(s => s.id === currentScreen)?.name || 'Select Screen';
+  const currentScreenName =
+    screens.find((s) => s.id === currentScreen)?.name || "Select Screen";
 
   return (
     <div className="bg-[#1A3A1A] px-4 py-4">
-      <label htmlFor="screen-select" className="sr-only">Select Screen</label>
+      <label htmlFor="screen-select" className="sr-only">
+        Select Screen
+      </label>
       <div className="relative">
         <select
           id="screen-select"

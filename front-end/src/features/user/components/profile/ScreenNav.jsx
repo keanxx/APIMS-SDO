@@ -13,7 +13,6 @@ import { ChevronDown } from "lucide-react";
 export function ScreenNav({ currentScreen, onScreenChange }) {
   const screens = [
     { id: "family-background", name: "Family Background" },
-    { id: "eligibility", name: "Eligibility" },
     { id: "trainings", name: "Training & Seminars" },
     { id: "service-records", name: "Service Record" },
 

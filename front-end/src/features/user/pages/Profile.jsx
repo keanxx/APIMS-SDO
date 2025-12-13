@@ -24,7 +24,7 @@ export default function Profile() {
             <FamilyScreen />
           </div>
         )}
-        {currentScreen === "eligibility" && <div>Eligibility Content</div>}
+       
         {currentScreen === "trainings" && (
           <div>
             <TrainingScreen />

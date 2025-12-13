@@ -5,6 +5,7 @@ import { TrainingScreen } from "../components/trainings/TrainingScreen";
 import { EducationScreen } from "../components/education/EducationScreen";
 import { SkillScreen } from "../components/skills/SkillScreen";
 import OtherHolder from "../components/others/OtherHolder";
+import { ServiceRecordsScreen } from "../components/service_records/ServiceRecordsScreen";
 
 export default function Profile() {
   const [currentScreen, setCurrentScreen] = useState("personal-info");
@@ -31,7 +32,7 @@ export default function Profile() {
           </div>
         )}
         {currentScreen === "service-records" && (
-          <div>Service Records Content</div>
+          <div><ServiceRecordsScreen /></div>
         )}
 
         {currentScreen === "educational-background" && (

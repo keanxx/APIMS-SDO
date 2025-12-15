@@ -108,7 +108,7 @@ export function SkillSection() {
           </div>
         ) : (
           skills.map((item) => (
-            <Card key={item.id}>
+            <Card className={"px-4"} key={item.id}>
               <p className="text-gray-900 mb-3">{item.skill}</p>
               <div className="flex gap-2 pt-3 border-t border-gray-100">
                 <button

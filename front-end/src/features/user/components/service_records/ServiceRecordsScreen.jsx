@@ -52,9 +52,12 @@ export function ServiceRecordsScreen() {
           </div>
         ) : (
           serviceRecords.map((record) => (
-            <Card key={record.service_id}>
+            <Card className={"px-4"} key={record.service_id}>
               <div className="mb-3">
+                <div> 
                 <h3 className="text-gray-900 font-medium">{record.position_name}</h3>
+               
+                </div>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs px-2 py-0.5 bg-[#1A3A1A]/10 text-[#1A3A1A] rounded">
                     {record.employment_status}

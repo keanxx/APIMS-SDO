@@ -16,7 +16,7 @@ export function AddEditFamily({
   isOpen, 
   onClose, 
   familyType,
-  editingData, // ✅ This should be the FULL family data from parent
+  editingData, // ✅ If this exists, we're editing; if null, we're adding
   onSuccess 
 }) {
   const { user } = useAuth();
@@ -37,35 +37,75 @@ export function AddEditFamily({
     mother_fname: "",
     mother_mname: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  const isEditing = editingData && editingData.id;
 
   // ✅ Load the FULL family data when editing
   useEffect(() => {
-    if (editingData && isOpen) {
-      setFormData({
-        spouse_fname: editingData.spouse_fname || "",
-        spouse_mname: editingData.spouse_mname || "",
-        spouse_lname: editingData.spouse_lname || "",
-        spouse_exname: editingData.spouse_exname || "",
-        occupation: editingData.occupation || "",
-        employer_business: editingData.employer_business || "",
-        business_add: editingData.business_add || "",
-        tel_no: editingData.tel_no || "",
-        father_lname: editingData.father_lname || "",
-        father_fname: editingData.father_fname || "",
-        father_mname: editingData.father_mname || "",
-        father_exname: editingData.father_exname || "",
-        mother_maidenname: editingData.mother_maidenname || "",
-        mother_fname: editingData.mother_fname || "",
-        mother_mname: editingData.mother_mname || "",
-      });
+    if (isOpen) {
+      if (editingData && editingData.id) {
+        setFormData({
+          spouse_fname: editingData.spouse_fname || "",
+          spouse_mname: editingData.spouse_mname || "",
+          spouse_lname: editingData.spouse_lname || "",
+          spouse_exname: editingData.spouse_exname || "",
+          occupation: editingData.occupation || "",
+          employer_business: editingData.employer_business || "",
+          business_add: editingData.business_add || "",
+          tel_no: editingData.tel_no || "",
+          father_lname: editingData.father_lname || "",
+          father_fname: editingData.father_fname || "",
+          father_mname: editingData.father_mname || "",
+          father_exname: editingData.father_exname || "",
+          mother_maidenname: editingData.mother_maidenname || "",
+          mother_fname: editingData.mother_fname || "",
+          mother_mname: editingData.mother_mname || "",
+        });
+      } else {
+        // Reset form for adding new record
+        setFormData({
+          spouse_fname: "",
+          spouse_mname: "",
+          spouse_lname: "",
+          spouse_exname: "",
+          occupation: "",
+          employer_business: "",
+          business_add: "",
+          tel_no: "",
+          father_lname: "",
+          father_fname: "",
+          father_mname: "",
+          father_exname: "",
+          mother_maidenname: "",
+          mother_fname: "",
+          mother_mname: "",
+        });
+      }
     }
   }, [editingData, isOpen]);
 
+  // ✅ Separate function for adding new family data
+  const handleAdd = async (payload) => {
+    const response = await axiosInstance.post('/family/add', payload);
+    return response;
+  };
+
+  // ✅ Separate function for updating existing family data
+  const handleUpdate = async (payload) => {
+    const response = await axiosInstance.put(
+      `/family/update/${editingData.id}`,
+      payload
+    );
+    return response;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      // ✅ Send ALL fields, not just the ones being edited
+      // ✅ Send ALL fields with employee_id
       const payload = {
         spouse_fname: formData.spouse_fname,
         spouse_mname: formData.spouse_mname,
@@ -85,16 +125,16 @@ export function AddEditFamily({
         employee_id: user.employee_id
       };
 
-      const response = await axiosInstance.put(
-        `/family/update/${user.employee_id}`,
-        payload
-      );
+      // ✅ Call the appropriate function based on mode
+      const response = isEditing ? await handleUpdate(payload) : await handleAdd(payload);
 
       onSuccess(response.data);
       onClose();
     } catch (error) {
       console.error('Failed to save family data:', error);
-      alert('Failed to save family information');
+      alert(error.response?.data?.message || 'Failed to save family information');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -109,6 +149,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, spouse_fname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -119,6 +160,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, spouse_mname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -129,6 +171,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, spouse_lname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -139,6 +182,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, spouse_exname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -149,6 +193,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, occupation: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -159,6 +204,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, employer_business: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -169,6 +215,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, business_add: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -179,6 +226,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, tel_no: e.target.value })
               }
+              disabled={loading}
             />
           </div>
         </>
@@ -193,6 +241,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, father_fname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -203,6 +252,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, father_mname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -213,6 +263,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, father_lname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -223,6 +274,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, father_exname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
         </>
@@ -237,6 +289,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, mother_fname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -247,6 +300,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, mother_mname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
 
@@ -257,6 +311,7 @@ export function AddEditFamily({
               onChange={(e) =>
                 setFormData({ ...formData, mother_maidenname: e.target.value })
               }
+              disabled={loading}
             />
           </div>
         </>
@@ -269,7 +324,7 @@ export function AddEditFamily({
       <DialogContent className="max-w-[400px] rounded-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Edit {familyType?.charAt(0).toUpperCase() + familyType?.slice(1)}
+            {isEditing ? 'Edit' : 'Add'} {familyType?.charAt(0).toUpperCase() + familyType?.slice(1)}
           </DialogTitle>
         </DialogHeader>
 
@@ -283,6 +338,7 @@ export function AddEditFamily({
               type="button"
               variant="outline"
               onClick={onClose}
+              disabled={loading}
             >
               Cancel
             </Button>
@@ -290,8 +346,9 @@ export function AddEditFamily({
             <Button
               type="submit"
               className="bg-[#1A3A1A] hover:bg-[#1A3A1A]/90"
+              disabled={loading}
             >
-              Save
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </DialogFooter>
         </form>

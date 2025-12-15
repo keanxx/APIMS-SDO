@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import ScreenNav from "../components/profile/ScreenNav";
-import { FamilyScreen } from "../components/family/FamilyScreen";
 import { TrainingScreen } from "../components/trainings/TrainingScreen";
 import { EducationScreen } from "../components/education/EducationScreen";
 import { SkillScreen } from "../components/skills/SkillScreen";
 import OtherHolder from "../components/others/OtherHolder";
 import { ServiceRecordsScreen } from "../components/service_records/ServiceRecordsScreen";
+import FamilyScreen from "../components/family/FamilyScreen";
 
 export default function Profile() {
-  const [currentScreen, setCurrentScreen] = useState("personal-info");
+  const [currentScreen, setCurrentScreen] = useState("family");
 
   return (
     <div>
@@ -20,7 +20,7 @@ export default function Profile() {
 
       {/* Content */}
       <div className="p-6">
-        {currentScreen === "family-background" && (
+        {currentScreen === "family" && (
           <div>
             <FamilyScreen />
           </div>

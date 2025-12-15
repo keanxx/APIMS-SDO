@@ -41,12 +41,7 @@ export default function Profile() {
             <EducationScreen />{" "}
           </div>
         )}
-        {currentScreen === "work-experience" && (
-          <div>Work Experience Content</div>
-        )}
-        {currentScreen === "voluntary-work" && (
-          <div>Voluntary Work Content</div>
-        )}
+       
         {currentScreen === "skills-recognitions" && (
           <div>
             <SkillScreen />

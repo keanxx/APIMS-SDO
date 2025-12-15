@@ -16,8 +16,6 @@ export function ScreenNav({ currentScreen, onScreenChange }) {
     { id: "trainings", name: "Training & Seminars" },
     { id: "service-records", name: "Service Record" },
     { id: "educational-background", name: "Education" },
-    { id: "work-experience", name: "Work Experience" },
-    { id: "voluntary-work", name: "Voluntary Work" },
     { id: "skills-recognitions", name: "Skills & Awards" },
     { id: "other-information", name: "Other Information" },
   ];

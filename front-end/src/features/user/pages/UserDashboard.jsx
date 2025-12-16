@@ -40,9 +40,10 @@ export default function UserDashboard() {
     setError(null);
 
     try {
-      // Fetch profile and stats in parallel
-      const [profileRes, trainingsRes, recognitionsRes, involvementsRes] = await Promise.all([
+      // Fetch profile, position, and stats in parallel
+      const [profileRes, positionRes, trainingsRes, recognitionsRes, involvementsRes] = await Promise.all([
         axiosInstance.get(`/employee/personal_info/${user.employee_id}`),
+        axiosInstance.get(`/employee/with-postion/${user.employee_id}`).catch(() => null),
         axiosInstance.get(`/trainings/${user.employee_id}`).catch(() => ({ data: { count: 0 } })),
         axiosInstance.get(`/recognition/${user.employee_id}`).catch(() => ({ data: [] })),
         axiosInstance.get(`/involvement/${user.employee_id}`).catch(() => ({ data: [] })),
@@ -50,6 +51,7 @@ export default function UserDashboard() {
 
       console.log("Dashboard Data:", {
         profile: profileRes.data,
+        position: positionRes?.data,
         trainings: trainingsRes.data,
         recognition: recognitionsRes.data,
         involvements: involvementsRes.data,
@@ -63,6 +65,12 @@ export default function UserDashboard() {
         familyMembers: 0, // Update when family endpoint is available
       });
 
+      // Get position data from with-position endpoint
+      const positionData = positionRes?.data || {};
+      const positionName = positionData.position_name || "N/A";
+      const workstationName = positionData.workstation_name || "N/A";
+      const employmentStatus = positionData.status || "N/A";
+
       // Check if profile response has data
       if (!profileRes.data || Object.keys(profileRes.data).length === 0) {
         // No data yet, set empty profile
@@ -72,9 +80,9 @@ export default function UserDashboard() {
           middleName: "",
           lastName: "",
           suffix: "",
-          position: user.position || "N/A",
-          department: user.department || "N/A",
-          employmentStatus: user.employment_status || "N/A",
+          position: positionName,
+          department: workstationName,
+          employmentStatus: employmentStatus,
           email: "",
           mobileNumber: "",
           telephoneNumber: "",
@@ -108,9 +116,9 @@ export default function UserDashboard() {
           middleName: apiData.m_name || "",
           lastName: apiData.l_name || "",
           suffix: apiData.ex_name || "",
-          position: user.position || "N/A",
-          department: user.department || "N/A",
-          employmentStatus: user.employment_status || "N/A",
+          position: positionName,
+          department: workstationName,
+          employmentStatus: employmentStatus,
           email: apiData.email_address || "",
           mobileNumber: apiData.mobile_no || "",
           telephoneNumber: apiData.tel_no || "",
@@ -160,9 +168,9 @@ export default function UserDashboard() {
           middleName: "",
           lastName: "",
           suffix: "",
-          position: user.position || "N/A",
-          department: user.department || "N/A",
-          employmentStatus: user.employment_status || "N/A",
+          position: "N/A",
+          department: "N/A",
+          employmentStatus: "N/A",
           email: "",
           mobileNumber: "",
           telephoneNumber: "",
@@ -220,17 +228,25 @@ export default function UserDashboard() {
   };
 
   const calculateAge = () => {
-    if (!profile?.dateOfBirth) return 0;
+    if (!profile?.dateOfBirth) return "N/A";
+    
     const birthDate = new Date(profile.dateOfBirth);
+    
+    if (isNaN(birthDate.getTime())) {
+      return "N/A";
+    }
+    
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
+    
     if (
       monthDiff < 0 ||
       (monthDiff === 0 && today.getDate() < birthDate.getDate())
     ) {
       age--;
     }
+    
     return age;
   };
 
@@ -334,6 +350,8 @@ export default function UserDashboard() {
               className={`${
                 profile.employmentStatus === "Permanent"
                   ? "bg-green-100 text-green-800 hover:bg-green-100"
+                  : profile.employmentStatus === "Job Order"
+                  ? "bg-orange-100 text-orange-800 hover:bg-orange-100"
                   : "bg-blue-100 text-blue-800 hover:bg-blue-100"
               }`}
             >
@@ -461,7 +479,12 @@ export default function UserDashboard() {
                   : "N/A"}
               </p>
             </div>
-           
+            <div>
+              <p className="text-xs text-gray-500 mb-0.5">Age</p>
+              <p className="text-sm text-gray-900">
+                {calculateAge() === "N/A" ? "N/A" : `${calculateAge()} years old`}
+              </p>
+            </div>
             <div>
               <p className="text-xs text-gray-500 mb-0.5">Gender</p>
               <p className="text-sm text-gray-900">{profile.gender || "N/A"}</p>
@@ -496,13 +519,12 @@ export default function UserDashboard() {
                 {profile.bloodType || "N/A"}
               </p>
             </div>
-             <div>
-             <p className="text-xs text-gray-500 mb-0.5">Place of Birth</p>
+            <div className="col-span-2">
+              <p className="text-xs text-gray-500 mb-0.5">Place of Birth</p>
               <p className="text-sm text-gray-900">
                 {profile.placeOfBirth || "N/A"}
               </p>
             </div>
-            
           </div>
         </CardContent>
       </Card>

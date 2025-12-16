@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AddEditScholarship } from './AddEditScholarship';
+import { ProfileSectionSkeleton } from '@/features/user/pages/Profile';
 
 export function ScholarshipSection() {
   const { user } = useAuth();
@@ -80,7 +81,7 @@ export function ScholarshipSection() {
   };
 
   if (loading) {
-    return <div className="text-gray-600">Loading scholarships...</div>;
+    return <div className="text-gray-600"><ProfileSectionSkeleton /></div>;
   }
 
   return (

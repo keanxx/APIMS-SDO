@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AddEditPublication } from './AddEditPublication';
+import { ProfileSectionSkeleton } from '@/features/user/pages/Profile';
 
 export function PublicationSection() {
   const { user } = useAuth();
@@ -80,7 +81,7 @@ export function PublicationSection() {
   };
 
   if (loading) {
-    return <div className="text-gray-600">Loading publications...</div>;
+    return <div className="text-gray-600"><ProfileSectionSkeleton /></div>;
   }
 
   return (

@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UserDashboard() {
   const { user } = useAuth();
@@ -62,7 +63,7 @@ export default function UserDashboard() {
         trainings: trainingsRes.data?.count || 0,
         recognition: Array.isArray(recognitionsRes.data) ? recognitionsRes.data.length : 0,
         involvements: Array.isArray(involvementsRes.data) ? involvementsRes.data.length : 0,
-        familyMembers: 0, // Update when family endpoint is available
+        familyMembers: 0,
       });
 
       // Get position data from with-position endpoint
@@ -73,7 +74,6 @@ export default function UserDashboard() {
 
       // Check if profile response has data
       if (!profileRes.data || Object.keys(profileRes.data).length === 0) {
-        // No data yet, set empty profile
         setProfile({
           id: null,
           firstName: "",
@@ -108,7 +108,6 @@ export default function UserDashboard() {
           tin: "",
         });
       } else {
-        // Transform API data to component format
         const apiData = profileRes.data;
         const transformedData = {
           id: apiData.employer_id,
@@ -122,7 +121,6 @@ export default function UserDashboard() {
           email: apiData.email_address || "",
           mobileNumber: apiData.mobile_no || "",
           telephoneNumber: apiData.tel_no || "",
-          // Construct full address from parts
           address: [
             apiData.house_no,
             apiData.street,
@@ -160,7 +158,6 @@ export default function UserDashboard() {
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
 
-      // If 404 or no data, initialize empty profile
       if (error.response?.status === 404) {
         setProfile({
           id: null,
@@ -260,7 +257,6 @@ export default function UserDashboard() {
     return typeof weight === "number" ? `${weight} kg` : weight;
   };
 
-  // Quick Stats Data
   const quickStats = [
     {
       label: "Years of Service",
@@ -288,13 +284,106 @@ export default function UserDashboard() {
     },
   ];
 
+  // Skeleton Loading State
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A3A1A] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
+      <div className="px-4 pb-6">
+        {/* Profile Header Skeleton */}
+        <Card className="mb-4 overflow-hidden pt-0" style={{ borderRadius: "12px" }}>
+          <Skeleton className="h-24 w-full rounded-none" />
+          <CardContent className="relative pt-0 px-4 pb-4">
+            <div className="flex items-start justify-between -mt-12 mb-4">
+              <Skeleton className="w-24 h-24 rounded-full border-4 border-white" />
+            </div>
+            <div className="mb-3">
+              <Skeleton className="h-7 w-48 mb-2" />
+              <Skeleton className="h-5 w-32 mb-2" />
+              <Skeleton className="h-4 w-40 mb-2" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <Skeleton className="h-4 w-48" />
+          </CardContent>
+        </Card>
+
+        {/* Quick Stats Skeleton */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {[1, 2, 3, 4].map((index) => (
+            <Card key={index} style={{ borderRadius: "12px" }}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-5 w-10" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+
+        {/* Contact Information Skeleton */}
+        <Card className="mb-4" style={{ borderRadius: "12px" }}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-40" />
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3].map((index) => (
+                <div key={index}>
+                  <div className="flex items-start gap-3">
+                    <Skeleton className="h-4 w-4 mt-0.5" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  </div>
+                  {index < 3 && <Separator className="mt-4" />}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Personal Information Skeleton */}
+        <Card className="mb-4" style={{ borderRadius: "12px" }}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-44" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
+                <div key={index} className={index === 8 ? "col-span-2" : ""}>
+                  <Skeleton className="h-3 w-20 mb-1" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Government IDs Skeleton */}
+        <Card style={{ borderRadius: "12px" }}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-center py-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  {index < 5 && <Separator />}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -328,7 +417,6 @@ export default function UserDashboard() {
       >
         <div className="bg-gradient-to-r from-[#1A3A1A] to-[#2d5a2d] h-24" />
         <CardContent className="relative pt-0 px-4 pb-4">
-          {/* Avatar */}
           <div className="flex items-start justify-between -mt-12 mb-4">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
               <AvatarImage src="" alt={getFullName()} />
@@ -338,7 +426,6 @@ export default function UserDashboard() {
             </Avatar>
           </div>
 
-          {/* Name & Position */}
           <div className="mb-3">
             <h2 className="text-gray-900 mb-1">{getFullName()}</h2>
             <p className="text-gray-600 mb-2">{profile.position}</p>
@@ -359,7 +446,6 @@ export default function UserDashboard() {
             </Badge>
           </div>
 
-          {/* Employee ID */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <IdCard className="w-4 h-4" />
             <span>Employee ID: {profile.id || user.employee_id}</span>
@@ -398,7 +484,6 @@ export default function UserDashboard() {
           </div>
 
           <div className="space-y-4">
-            {/* Email */}
             <div className="flex items-start gap-3">
               <Mail className="w-4 h-4 text-gray-400 mt-0.5" />
               <div className="flex-1 min-w-0">
@@ -411,7 +496,6 @@ export default function UserDashboard() {
 
             <Separator />
 
-            {/* Mobile */}
             <div className="flex items-start gap-3">
               <Phone className="w-4 h-4 text-gray-400 mt-0.5" />
               <div className="flex-1">
@@ -424,7 +508,6 @@ export default function UserDashboard() {
 
             <Separator />
 
-            {/* Telephone */}
             {profile.telephoneNumber && (
               <>
                 <div className="flex items-start gap-3">
@@ -442,7 +525,6 @@ export default function UserDashboard() {
               </>
             )}
 
-            {/* Address */}
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
               <div className="flex-1">

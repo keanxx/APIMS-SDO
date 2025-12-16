@@ -3,6 +3,7 @@ import { Briefcase } from "lucide-react";
 import { useAuth } from "@/features/auth/components/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import { Card } from "@/components/ui/card";
+import { ProfileSectionSkeleton } from "../../pages/Profile";
 
 export function ServiceRecordsScreen() {
   const { user } = useAuth();
@@ -35,7 +36,7 @@ export function ServiceRecordsScreen() {
   }, [user?.employee_id]);
 
   if (loading) {
-    return <div className="text-gray-600">Loading service records...</div>;
+    return <div className="text-gray-600"><ProfileSectionSkeleton /></div>;
   }
 
   return (

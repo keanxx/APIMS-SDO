@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ProfileSectionSkeleton } from "../../pages/Profile";
 
 export function EducationScreen() {
   const { user } = useAuth(); 
@@ -90,12 +91,7 @@ const handleSuccess = async () => {
   if (loading) {
     return (
       <div className="pb-8">
-        <div className="py-5 px-2 border-b border-gray-200">
-          <h2>Education</h2>
-        </div>
-        <div className="px-2 py-4">
-          <p className="text-gray-600">Loading education records...</p>
-        </div>
+        <ProfileSectionSkeleton />
       </div>
     );
   }

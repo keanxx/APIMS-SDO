@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ProfileSectionSkeleton } from "../../pages/Profile";
 
 export default function InvolvementScreen() {
   const { user } = useAuth();
@@ -89,12 +90,7 @@ export default function InvolvementScreen() {
   if (loading) {
     return (
       <div className="pb-8">
-        <div className="py-5 px-2 border-b border-gray-200">
-          <h2>Involvement</h2>
-        </div>
-        <div className="px-2 py-4">
-          <p className="text-gray-600">Loading involvement records...</p>
-        </div>
+        <ProfileSectionSkeleton />
       </div>
     );
   }

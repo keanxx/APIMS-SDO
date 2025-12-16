@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AddEditFamily } from "./AddEditFamily";
 import Children from "./Children";
+import { ProfileSectionSkeleton } from "../../pages/Profile";
 
 export default function FamilyScreen() {
   const { user } = useAuth();
@@ -100,9 +101,7 @@ export default function FamilyScreen() {
   if (loading) {
     return (
       <div className="pb-8">
-        <div className="px-4 py-4">
-          <p className="text-gray-600">Loading family information...</p>
-        </div>
+        <ProfileSectionSkeleton />
       </div>
     );
   }

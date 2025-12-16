@@ -4,6 +4,7 @@ import axiosInstance from '@/api/axiosInstance'
 import HeaderUser from '../components/dashboard/HeaderUser'
 import EligibilityCard from '../components/eligibility/EligibilityCard'
 import AddEligibility from '../components/eligibility/AddEligibility'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const Eligibility = () => {
   const { user } = useAuth()
@@ -46,11 +47,48 @@ const Eligibility = () => {
       <div className='bg-[#F7F9F7] p-4 space-y-4 min-h-screen'>
         <div className='flex justify-between items-center'>
           <h2 className="text-gray-900 px-1">Eligibility Records</h2>
-          <AddEligibility onSuccess={handleSuccess} /> {/* ✅ Pass callback */}
+          <AddEligibility onSuccess={handleSuccess} />
         </div>
         
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-md p-4 border border-gray-100"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-8 rounded" />
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-3 border-t border-gray-100">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : eligibilityList.length > 0 ? (
           <EligibilityCard 
             eligibilityList={eligibilityList} 

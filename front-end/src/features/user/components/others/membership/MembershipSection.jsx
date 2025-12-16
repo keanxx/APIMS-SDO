@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { AddEditMembership } from './AddEditMembership';
+import { ProfileSectionSkeleton } from '@/features/user/pages/Profile';
 
 export function MembershipSection() {
   const { user } = useAuth();
@@ -83,7 +84,7 @@ export function MembershipSection() {
   };
 
   if (loading) {
-    return <div className="text-gray-600">Loading memberships...</div>;
+    return <div><ProfileSectionSkeleton /></div>;
   }
 
   return (

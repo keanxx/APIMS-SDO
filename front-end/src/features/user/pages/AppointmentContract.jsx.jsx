@@ -3,6 +3,7 @@ import { useAuth } from "@/features/auth/components/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import HeaderUser from "../components/dashboard/HeaderUser";
 import { Briefcase } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AppointmentContract = () => {
   const { user } = useAuth();
@@ -128,11 +129,46 @@ const AppointmentContract = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A3A1A] mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading...</p>
-            </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-md p-4 border border-gray-100"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-28" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-28" />
+                  </div>
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">

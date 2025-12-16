@@ -122,7 +122,7 @@ export function TrainingScreen() {
         ) : (
           trainings.map((training) => (
             <Card key={training.id}>
-              <CardContent className="p-4">
+              <CardContent className="px-4">
                 {/* ✅ Title and View button on same row */}
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg text-gray-900">{training.title}</h3>

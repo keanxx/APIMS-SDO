@@ -1,12 +1,13 @@
 import React from "react";
 import { MembershipSection } from "./membership/MembershipSection";
 import { ScholarshipSection } from "./shcolarship/ScholarshipSection";
-import { PublicationSection } from "./publication/PublicationSection";
+import InvolvementScreen from "../involvement/InvolvementScreen";
 
 const OtherHolder = () => {
   return (
-    <div>
-      <PublicationSection />
+    <div className="space-y-3">
+      
+      <InvolvementScreen />
       <MembershipSection />
       <ScholarshipSection />
     </div>

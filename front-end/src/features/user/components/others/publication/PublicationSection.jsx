@@ -87,7 +87,7 @@ export function PublicationSection() {
     <div>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-[#1A3A1A]" />
+          <BookOpen className="h-5 w-5 text-[#1A3A1A]" />
           <h2 className="text-gray-900">Publications</h2>
         </div>
         <button

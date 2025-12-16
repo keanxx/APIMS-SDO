@@ -1,3 +1,4 @@
+// UserDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth/components/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
@@ -7,7 +8,6 @@ import {
   Phone,
   MapPin,
   Building2,
-  Edit,
   FileText,
   Award,
   GraduationCap,
@@ -16,36 +16,55 @@ import {
   IdCard,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import EditPersonal from "../components/dashboard/EditPersonal";
 
 export default function UserDashboard() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingSection, setEditingSection] = useState("personal");
+  const [stats, setStats] = useState({
+    trainings: 0,
+    recognition: 0,
+    involvements: 0,
+    familyMembers: 0,
+  });
 
-  // Fetch employee personal info
-  const fetchPersonalInfo = async () => {
+  // Fetch all dashboard data
+  const fetchDashboardData = async () => {
     if (!user?.employee_id) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axiosInstance.get(
-        `/employee/personal_info/${user.employee_id}`
-      );
+      // Fetch profile and stats in parallel
+      const [profileRes, trainingsRes, recognitionsRes, involvementsRes] = await Promise.all([
+        axiosInstance.get(`/employee/personal_info/${user.employee_id}`),
+        axiosInstance.get(`/trainings/${user.employee_id}`).catch(() => ({ data: { count: 0 } })),
+        axiosInstance.get(`/recognition/${user.employee_id}`).catch(() => ({ data: [] })),
+        axiosInstance.get(`/involvement/${user.employee_id}`).catch(() => ({ data: [] })),
+      ]);
 
-      console.log("Personal Info Response:", response.data);
+      console.log("Dashboard Data:", {
+        profile: profileRes.data,
+        trainings: trainingsRes.data,
+        recognition: recognitionsRes.data,
+        involvements: involvementsRes.data,
+      });
 
-      // Check if response has data
-      if (!response.data || Object.keys(response.data).length === 0) {
+      // Set stats - trainings has count, others are arrays
+      setStats({
+        trainings: trainingsRes.data?.count || 0,
+        recognition: Array.isArray(recognitionsRes.data) ? recognitionsRes.data.length : 0,
+        involvements: Array.isArray(involvementsRes.data) ? involvementsRes.data.length : 0,
+        familyMembers: 0, // Update when family endpoint is available
+      });
+
+      // Check if profile response has data
+      if (!profileRes.data || Object.keys(profileRes.data).length === 0) {
         // No data yet, set empty profile
         setProfile({
           id: null,
@@ -82,7 +101,7 @@ export default function UserDashboard() {
         });
       } else {
         // Transform API data to component format
-        const apiData = response.data;
+        const apiData = profileRes.data;
         const transformedData = {
           id: apiData.employer_id,
           firstName: apiData.f_name || "",
@@ -131,7 +150,7 @@ export default function UserDashboard() {
 
       setLoading(false);
     } catch (error) {
-      console.error("Failed to fetch personal info:", error);
+      console.error("Failed to fetch dashboard data:", error);
 
       // If 404 or no data, initialize empty profile
       if (error.response?.status === 404) {
@@ -168,6 +187,12 @@ export default function UserDashboard() {
           sss: "",
           tin: "",
         });
+        setStats({
+          trainings: 0,
+          recognition: 0,
+          involvements: 0,
+          familyMembers: 0,
+        });
       } else {
         setError(error.message);
       }
@@ -178,14 +203,9 @@ export default function UserDashboard() {
 
   useEffect(() => {
     if (user?.employee_id) {
-      fetchPersonalInfo();
+      fetchDashboardData();
     }
   }, [user?.employee_id]);
-
-  const handleEdit = (section) => {
-    setEditingSection(section);
-    setIsEditDialogOpen(true);
-  };
 
   const getInitials = () => {
     if (!profile || !profile.firstName || !profile.lastName) return "NA";
@@ -234,14 +254,19 @@ export default function UserDashboard() {
     },
     {
       label: "Trainings",
-      value: "24",
+      value: stats.trainings,
       icon: GraduationCap,
       color: "text-purple-600",
     },
-    { label: "Awards", value: "5", icon: Award, color: "text-amber-600" },
     {
-      label: "Family Members",
-      value: "3",
+      label: "Recognition",
+      value: stats.recognition,
+      icon: Award,
+      color: "text-amber-600",
+    },
+    {
+      label: "Involvements",
+      value: stats.involvements,
       icon: Users,
       color: "text-green-600",
     },
@@ -273,13 +298,6 @@ export default function UserDashboard() {
       <div className="px-4 py-8">
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
           <p className="text-gray-600">No profile data found.</p>
-          <Button
-            onClick={() => handleEdit("personal")}
-            className="bg-[#1A3A1A] hover:bg-[#2d5a2d] mt-4"
-            style={{ borderRadius: "8px" }}
-          >
-            Add Profile Information
-          </Button>
         </div>
       </div>
     );
@@ -302,15 +320,6 @@ export default function UserDashboard() {
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
-            <Button
-              onClick={() => handleEdit("personal")}
-              size="sm"
-              className="bg-[#1A3A1A] hover:bg-[#2d5a2d] text-white mt-2"
-              style={{ borderRadius: "8px" }}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              {profile.id ? "Edit Profile" : "Add Profile"}
-            </Button>
           </div>
 
           {/* Name & Position */}
@@ -365,19 +374,9 @@ export default function UserDashboard() {
       {/* Contact Information */}
       <Card className="mb-4" style={{ borderRadius: "12px" }}>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-[#1A3A1A]" />
-              <h3 className="text-gray-900">Contact Information</h3>
-            </div>
-            <Button
-              onClick={() => handleEdit("contact")}
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-2 mb-4">
+            <Phone className="w-5 h-5 text-[#1A3A1A]" />
+            <h3 className="text-gray-900">Contact Information</h3>
           </div>
 
           <div className="space-y-4">
@@ -444,19 +443,9 @@ export default function UserDashboard() {
       {/* Personal Information */}
       <Card className="mb-4" style={{ borderRadius: "12px" }}>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <User className="w-5 h-5 text-[#1A3A1A]" />
-              <h3 className="text-gray-900">Personal Information</h3>
-            </div>
-            <Button
-              onClick={() => handleEdit("personal")}
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-2 mb-4">
+            <User className="w-5 h-5 text-[#1A3A1A]" />
+            <h3 className="text-gray-900">Personal Information</h3>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -472,12 +461,7 @@ export default function UserDashboard() {
                   : "N/A"}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-0.5">Age</p>
-              <p className="text-sm text-gray-900">
-                {calculateAge()} years old
-              </p>
-            </div>
+           
             <div>
               <p className="text-xs text-gray-500 mb-0.5">Gender</p>
               <p className="text-sm text-gray-900">{profile.gender || "N/A"}</p>
@@ -512,12 +496,13 @@ export default function UserDashboard() {
                 {profile.bloodType || "N/A"}
               </p>
             </div>
-            <div className="col-span-2">
-              <p className="text-xs text-gray-500 mb-0.5">Place of Birth</p>
+             <div>
+             <p className="text-xs text-gray-500 mb-0.5">Place of Birth</p>
               <p className="text-sm text-gray-900">
                 {profile.placeOfBirth || "N/A"}
               </p>
             </div>
+            
           </div>
         </CardContent>
       </Card>
@@ -525,19 +510,9 @@ export default function UserDashboard() {
       {/* Government IDs */}
       <Card style={{ borderRadius: "12px" }}>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#1A3A1A]" />
-              <h3 className="text-gray-900">Government IDs</h3>
-            </div>
-            <Button
-              onClick={() => handleEdit("government")}
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-5 h-5 text-[#1A3A1A]" />
+            <h3 className="text-gray-900">Government IDs</h3>
           </div>
 
           <div className="space-y-3">
@@ -578,16 +553,6 @@ export default function UserDashboard() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Edit/Add Dialog */}
-      <EditPersonal
-        isOpen={isEditDialogOpen}
-        onClose={() => setIsEditDialogOpen(false)}
-        section={editingSection}
-        profileData={profile}
-        onSuccess={fetchPersonalInfo}
-        employeeUuid={user.employee_id} // Pass UUID here
-      />
     </div>
   );
 }

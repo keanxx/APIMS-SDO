@@ -1,5 +1,6 @@
+// SkillSection.jsx
 import React, { useState, useEffect } from "react";
-import { Sparkles, Edit2, Trash2 } from "lucide-react";
+import { Sparkles, Edit2, Trash2, X } from "lucide-react";
 import { useAuth } from "@/features/auth/components/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AddEditSkill } from "./AddEditSkill";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export function SkillSection() {
   const { user } = useAuth();
@@ -101,35 +103,36 @@ export function SkillSection() {
         </button>
       </div>
 
-      <div className="space-y-3">
+      <Card className="px-4 py-4">
         {skills.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             No skills added yet. Click "Add" to create one.
           </div>
         ) : (
-          skills.map((item) => (
-            <Card className={"px-4"} key={item.id}>
-              <p className="text-gray-900 mb-3">{item.skill}</p>
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2">
+            {skills.map((item) => (
+              <Badge
+                key={item.id}
+                variant="secondary"
+                className="text-sm px-3 py-2 bg-[#1A3A1A]/10 text-[#1A3A1A] hover:bg-[#1A3A1A]/20 group cursor-pointer"
+              >
+                <span onClick={() => handleEdit(item)} className="mr-2">
+                  {item.skill}
+                </span>
                 <button
-                  onClick={() => handleEdit(item)}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#1A3A1A] transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(item.id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <Edit2 className="w-4 h-4" />
-                  Edit
+                  <X className="w-3 h-3" />
                 </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-red-600 transition-colors ml-3"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
-              </div>
-            </Card>
-          ))
+              </Badge>
+            ))}
+          </div>
         )}
-      </div>
+      </Card>
 
       <AddEditSkill
         isOpen={isDialogOpen}
